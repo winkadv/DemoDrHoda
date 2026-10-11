@@ -1,0 +1,1546 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dr. Hoda Hatem</title>
+<meta name="description" content="Dr. Hoda Hatem, nutrition and weight-management specialist and creator of the non-surgical Elite techniques. Clinics in Tanta, Zagazig and Cairo (CMS Mall).">
+<link rel="icon" href="assets/logo-mark.png">
+
+<!-- Brand font: Norsal (fonts/NorsalGX.ttf). Readex Pro is only a fallback while it loads. -->
+<link rel="preload" href="fonts/NorsalGX.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Icons: Phosphor -->
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
+
+<!-- GSAP (animation only) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+
+<style>
+/* =========================================================
+   GLOBAL TOKENS (fixed brand palette for all 5 directions)
+   ========================================================= */
+/* Norsal variable font (weights 100 to 900, Arabic + Latin) */
+@font-face { font-family: "Norsal"; src: url("fonts/NorsalGX.ttf") format("truetype-variations"), url("fonts/NorsalGX.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  /* brand */
+  --teal: #005A54;
+  --sand: #EAD8C5;
+  /* tints & shades derived only from the two brand colors */
+  --teal-deep: #00423D;
+  --teal-ink: #012E2A;
+  --teal-70: rgba(0, 90, 84, .7);
+  --teal-50: rgba(0, 90, 84, .5);
+  --teal-15: rgba(0, 90, 84, .15);
+  --teal-08: rgba(0, 90, 84, .08);
+  --sand-soft: #F2E7DB;
+  --sand-mist: #F8F2EC;
+  --sand-deep: #DCC5AD;
+  --sand-60: rgba(234, 216, 197, .6);
+  --sand-20: rgba(234, 216, 197, .2);
+
+  --font: "Norsal", "Readex Pro", system-ui, sans-serif;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --dock-h: 56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+/* Norsal's space glyph is narrow (0.16em). Set per element so the gap scales with every font size. */
+:where(*) { word-spacing: .12em; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; font-family: var(--font); color: var(--teal-ink);
+  background: var(--sand-mist); -webkit-font-smoothing: antialiased;
+
+  text-rendering: optimizeLegibility; overflow-x: hidden;
+}
+img { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4, p, ul, ol, figure, blockquote { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+/* ---------- Bilingual system ----------
+   Every string exists twice: .en and .ar. Arabic copy is written for Arabic readers, not translated line by line. */
+html[lang="en"] .ar, html[lang="ar"] .en { display: none !important; }
+html[lang="ar"] body { font-size: 106%; }
+html[lang="ar"] * { letter-spacing: 0 !important; font-style: normal !important; }
+
+/* ---------- Concepts ---------- */
+.concept { display: none; min-height: 100dvh; }
+.concept.is-active { display: block; }
+.concept section[id] { scroll-margin-top: 84px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* photo treatment helper: the studio photo melts into sand backgrounds */
+.melt { mix-blend-mode: multiply; filter: brightness(1.16) contrast(1.04); }
+/* face crop from the studio portrait (face sits ~27% from the top) */
+.face-crop img { object-fit: cover; object-position: 50% 0; transform: scale(var(--z, 3)); transform-origin: 50% 27%; }
+/* duotone: teal shadows, sand highlights (works on any background) */
+.duo { position: relative; background: var(--sand); isolation: isolate; overflow: hidden; }
+.duo img { filter: grayscale(1) brightness(1.15) contrast(1.08); mix-blend-mode: multiply; }
+.duo::after { content: ""; position: absolute; inset: 0; background: var(--teal); mix-blend-mode: lighten; pointer-events: none; }
+
+/* ---------- Shared booking states (each direction styles the rest) ---------- */
+
+[data-step] { display: none; }
+[data-step].is-current { display: block; }
+.is-loading { pointer-events: none; position: relative; color: transparent !important; }
+.is-loading::after { content: ""; position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; border-radius: 50%; border: 2px solid currentColor; border-color: var(--sand) var(--sand) transparent transparent; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.field-error { font-size: .82em; color: #A0322A; min-height: 1.2em; }
+[data-success] { display: none; }
+.is-done [data-success] { display: block; }
+.is-done [data-hide-on-done] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body data-only="c1">
+
+
+<script>
+/* =========================================================
+   APP CORE: direction switching, language, shared helpers,
+   and a small booking engine every direction styles its own way.
+   ========================================================= */
+gsap.registerPlugin(ScrollTrigger);
+
+const App = {
+  RM: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  lang: "en",
+  current: null,
+  ctx: null,
+  defs: {},
+  bookings: [],
+
+  register(id, def) { def.id = id; this.defs[id] = def; },
+  t(en, ar) { return this.lang === "ar" ? ar : en; },
+  get rtl() { return this.lang === "ar"; },
+
+  /* ---------- labels shared across all directions ---------- */
+  CLINICS: {
+    tanta:   { en: "Tanta", ar: "طنطا" },
+    zagazig: { en: "Zagazig", ar: "الزقازيق" },
+    cairo:   { en: "Cairo, CMS Mall", ar: "القاهرة، سي إم إس مول" }
+  },
+  TECH: {
+    shot:   { en: "Elite Shot", ar: "إيليت شوت" },
+    plus:   { en: "Elite Plus", ar: "إيليت بلس" },
+    less:   { en: "Elite Less", ar: "إيليت لِس" },
+    fit:    { en: "Elite Fit", ar: "إيليت فيت" },
+    tide:   { en: "Elite TIDE", ar: "إيليت تايد" },
+    advise: { en: "Dr. Hoda to advise", ar: "د. هدى تحدد الأنسب" }
+  },
+  label(map, key) { return map[key] ? map[key][this.lang] : ""; },
+  SLOTS: ["11:00", "12:30", "14:00", "15:30", "17:00", "18:30", "20:00"],
+  fmtDay(d, o) { return new Intl.DateTimeFormat(this.lang === "ar" ? "ar-EG" : "en-GB", o).format(d); },
+  fmtTime(t) { const [h, m] = t.split(":"); const d = new Date(); d.setHours(+h, +m); return this.fmtDay(d, { hour: "numeric", minute: "2-digit" }); },
+  iso(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; },
+  busy(date, i) { return !!date && (date.charCodeAt(9) + i * 3) % 5 === 0; }, // deterministic sample "booked" slots
+  nextDays(n = 12) { // sample availability: Fridays closed
+    const out = []; const d = new Date(); d.setHours(0, 0, 0, 0);
+    while (out.length < n) { d.setDate(d.getDate() + 1); if (d.getDay() !== 5) out.push(new Date(d)); }
+    return out;
+  },
+
+  /* ---------- lifecycle ---------- */
+  show(id, { keepScroll = false } = {}) {
+    if (!this.defs[id]) id = "c1";
+    if (this.ctx) { this.ctx.revert(); this.ctx = null; }
+    document.querySelectorAll(".concept").forEach(c => c.classList.toggle("is-active", c.id === id));
+    document.querySelectorAll("[data-dock-go]").forEach(b => b.setAttribute("aria-pressed", b.dataset.dockGo === id));
+    this.current = id;
+    try { localStorage.setItem("hh-concept", id); } catch (e) {}
+    if (!keepScroll) window.scrollTo(0, 0);
+    const root = document.getElementById(id);
+    const def = this.defs[id];
+    if (!def._setup) { def.setup && def.setup(root); def._setup = true; }
+    this.ctx = gsap.context(() => def.animate && def.animate(root), root);
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  },
+
+  setLang(lang) {
+    this.lang = lang;
+    const html = document.documentElement;
+    html.lang = lang; html.dir = lang === "ar" ? "rtl" : "ltr";
+    document.querySelectorAll("[data-set-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setLang === lang));
+    try { localStorage.setItem("hh-lang", lang); } catch (e) {}
+    this.bookings.forEach(b => b.render());
+    Object.values(this.defs).forEach(d => d._setup && d.onLang && d.onLang(document.getElementById(d.id)));
+    if (this.current) this.show(this.current, { keepScroll: true });
+  },
+
+  /* ---------- motion helpers (all respect reduced motion) ---------- */
+  reveal(root, sel) {
+    if (this.RM) return;
+    gsap.utils.toArray(root.querySelectorAll(sel)).forEach(el => {
+      gsap.from(el, { opacity: 0, y: 28, duration: 1.1, ease: "expo.out", scrollTrigger: { trigger: el, start: "top 86%" } });
+    });
+  },
+  revealStagger(root, sel) {
+    if (this.RM) return;
+    root.querySelectorAll(sel).forEach(group => {
+      gsap.from(group.children, { opacity: 0, y: 34, duration: 1, stagger: .1, ease: "expo.out", scrollTrigger: { trigger: group, start: "top 84%" } });
+    });
+  },
+  /* wraps every word in a span (keeps Arabic letters joined because we split on spaces only) */
+  wordify(nodes) {
+    nodes.forEach(n => { n.innerHTML = n.textContent.trim().split(/\s+/).map(w => `<span class="w">${w}</span>`).join(" "); });
+  },
+
+  /* ---------- booking engine ----------
+     Markup contract:
+       [data-step="n"] panels (optional data-require="clinic,technique,date,time")
+       [data-pick="field"][data-value]   choice buttons
+       [data-days] / [data-times]         rendered chips (data-day-class / data-time-class)
+       [data-next] [data-back] [data-submit] [data-summary] [data-ref] [data-err="name|phone"]
+     Days, times and availability are sample data for this UI exploration. */
+  booking(el, opts = {}) {
+    const app = this;
+    const SLOTS = app.SLOTS;
+    const state = {};
+    let step = 1;
+    const steps = opts.steps || el.querySelectorAll("[data-step]").length;
+    const form = el.matches("form") ? el : el.querySelector("form");
+
+    const fmtDay = (d, o) => app.fmtDay(d, o);
+    // opts.days(state) / opts.slots(state) let a direction supply real clinic availability
+    const days = () => opts.days ? opts.days(state) : app.nextDays();
+    const slots = () => opts.slots ? opts.slots(state) : SLOTS;
+    const iso = d => app.iso(d);
+    const fmtTime = t => app.fmtTime(t);
+    const busy = (date, i) => app.busy(date, i);
+
+    const api = {
+      state,
+      set(k, v) {
+        state[k] = v;
+        el.querySelectorAll(`[data-pick="${k}"]`).forEach(b => b.setAttribute("aria-pressed", b.dataset.value === v));
+        if (k === "clinic" && opts.days) { delete state.date; delete state.time; renderDays(); renderTimes(); }
+        if (k === "date") { delete state.time; renderTimes(); }
+        if (k === "time") el.querySelectorAll("[data-time]").forEach(b => b.setAttribute("aria-pressed", b.dataset.time === v));
+        renderSummary(); clearErr();
+        opts.onChange && opts.onChange(k, v, state);
+      },
+      go(n, dir = 1) {
+        step = Math.max(1, Math.min(steps, n));
+        el.querySelectorAll("[data-step]").forEach(s => s.classList.toggle("is-current", +s.dataset.step === step));
+        const cur = el.querySelector(`[data-step="${step}"]`);
+        opts.onStep && opts.onStep(step, cur, dir);
+      },
+      get step() { return step; },
+      next() {
+        const cur = el.querySelector(`[data-step="${step}"]`);
+        const req = (cur && cur.dataset.require || "").split(",").filter(Boolean);
+        const missing = req.find(r => !state[r]);
+        if (missing) { stepErr(missing); return false; }
+        api.go(step + 1, 1); return true;
+      },
+      reset() {
+        Object.keys(state).forEach(k => delete state[k]);
+        el.classList.remove("is-done"); form && form.reset();
+        el.querySelectorAll("[aria-pressed]").forEach(b => { if (b.dataset.pick || b.dataset.time || b.dataset.date) b.setAttribute("aria-pressed", "false"); });
+        renderDays(); renderTimes(); renderSummary(); clearErr();
+      },
+      render() { renderDays(); renderTimes(); renderSummary(); },
+      validate
+    };
+
+    function stepErr(field) {
+      const msg = (opts.messages && opts.messages[field] && app.t(...opts.messages[field])) || {
+        clinic: app.t("Please choose a clinic.", "من فضلك اختر العيادة."),
+        technique: app.t("Please choose a technique, or let Dr. Hoda advise.", "اختر تقنية، أو اترك القرار لـ د. هدى."),
+        date: app.t("Please choose a day.", "من فضلك اختر اليوم."),
+        time: app.t("Please choose a time.", "من فضلك اختر الميعاد.")
+      }[field];
+      const box = el.querySelector("[data-step-error]");
+      if (box) box.textContent = msg;
+      if (!app.RM && box) gsap.fromTo(box, { x: -6 }, { x: 0, duration: .5, ease: "elastic.out(1, .3)" });
+    }
+    function clearErr() { el.querySelectorAll("[data-step-error], [data-err]").forEach(e => e.textContent = ""); }
+
+    function renderDays() {
+      el.querySelectorAll("[data-days]").forEach(box => {
+        const cls = box.dataset.dayClass || "";
+        const list = days();
+        if (!list.length) { box.innerHTML = `<p style="opacity:.6;font-size:14px">${app.t("Choose a clinic first to see its days.", "اختر العيادة الأول علشان تظهر أيامها.")}</p>`; return; }
+        box.innerHTML = list.map(d => `<button type="button" class="${cls}" data-date="${iso(d)}" aria-pressed="${state.date === iso(d)}"><small>${fmtDay(d, { weekday: "short" })}</small><b>${fmtDay(d, { day: "numeric" })}</b><small>${fmtDay(d, { month: "short" })}</small></button>`).join("");
+        box.querySelectorAll("[data-date]").forEach(b => b.addEventListener("click", () => {
+          box.querySelectorAll("[data-date]").forEach(x => x.setAttribute("aria-pressed", x === b));
+          api.set("date", b.dataset.date);
+        }));
+      });
+    }
+    function renderTimes() {
+      el.querySelectorAll("[data-times]").forEach(box => {
+        const cls = box.dataset.timeClass || "";
+        if (!state.date) { box.innerHTML = `<p class="${box.dataset.emptyClass || ""}" style="grid-column:1/-1;opacity:.6;font-size:14px">${app.t("Pick a day to see available times.", "اختر اليوم لتظهر المواعيد المتاحة.")}</p>`; return; }
+        box.innerHTML = slots().map((t, i) => `<button type="button" class="${cls}" data-time="${t}" aria-pressed="${state.time === t}" ${busy(state.date, i) ? "disabled" : ""}>${fmtTime(t)}</button>`).join("");
+        box.querySelectorAll("[data-time]").forEach(b => b.addEventListener("click", () => api.set("time", b.dataset.time)));
+        if (!app.RM) gsap.from(box.children, { opacity: 0, y: 8, stagger: .03, duration: .4, ease: "power2.out" });
+      });
+    }
+    function renderSummary() {
+      el.querySelectorAll("[data-summary]").forEach(box => {
+        const row = (k, v) => v ? `<div><span>${k}</span> <b>${v}</b></div>` : "";
+        const date = state.date ? fmtDay(new Date(state.date + "T00:00"), { weekday: "long", day: "numeric", month: "long" }) : "";
+        box.innerHTML =
+          row(app.t("Clinic", "العيادة"), app.label(app.CLINICS, state.clinic)) +
+          row(app.t("Technique", "التقنية"), app.label(app.TECH, state.technique)) +
+          row(app.t("When", "الموعد"), date && state.time ? `${date}, ${fmtTime(state.time)}` : date);
+        box.hidden = !box.innerHTML;
+      });
+      el.querySelectorAll("[data-out]").forEach(o => {
+        const k = o.dataset.out;
+        const val = k === "clinic" ? app.label(app.CLINICS, state.clinic) : k === "technique" ? app.label(app.TECH, state.technique)
+          : k === "date" && state.date ? fmtDay(new Date(state.date + "T00:00"), { weekday: "short", day: "numeric", month: "short" })
+          : k === "time" && state.time ? fmtTime(state.time) : "";
+        o.textContent = val || (o.dataset.empty ? app.t(...o.dataset.empty.split("|")) : "");
+        o.classList.toggle("empty", !val);
+      });
+    }
+    function validate() {
+      let ok = true;
+      const name = form.elements.name, phone = form.elements.phone;
+      const setErr = (k, m) => { const e = el.querySelector(`[data-err="${k}"]`); if (e) e.textContent = m; if (m) ok = false; };
+      setErr("name", name && name.value.trim().length < 3 ? app.t("Please write your full name.", "من فضلك اكتب اسمك بالكامل.") : "");
+      const digits = phone ? phone.value.replace(/[\s-]/g, "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)) : "";
+      setErr("phone", phone && !/^(\+?20)?01[0125]\d{8}$/.test(digits) ? app.t("Enter an Egyptian mobile number, e.g. 010 1234 5678.", "اكتب رقم موبايل مصري صحيح، مثل ٠١٠ ١٢٣٤ ٥٦٧٨.") : "");
+      if (opts.require) opts.require.forEach(r => { if (!state[r]) { ok = false; stepErr(r); } });
+      return ok;
+    }
+
+    el.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => {
+      api.set(b.dataset.pick, b.dataset.value);
+      if (opts.autoAdvance && b.closest("[data-step]") && step < steps) setTimeout(() => api.next(), 380);
+    }));
+    el.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", () => api.next()));
+    el.querySelectorAll("[data-back]").forEach(b => b.addEventListener("click", () => api.go(step - 1, -1)));
+    if (form) form.addEventListener("submit", e => {
+      e.preventDefault();
+      if (!validate()) return;
+      const btn = form.querySelector("[data-submit]");
+      btn.classList.add("is-loading");
+      setTimeout(() => {
+        btn.classList.remove("is-loading");
+        state.ref = opts.makeRef ? opts.makeRef(state) : "HH-" + Math.floor(1000 + Math.random() * 9000);
+        el.querySelectorAll("[data-ref]").forEach(r => r.textContent = state.ref);
+        el.classList.add("is-done");
+        opts.onDone && opts.onDone(state);
+      }, 1200);
+    });
+    api.render();
+    if (el.querySelector("[data-step]")) api.go(1);
+    app.bookings.push(api);
+    return api;
+  }
+};
+</script>
+
+
+<!-- =====================================================================
+     DIRECTION 01: ATELIER
+     Luxury medical persona. Editorial, sharp corners, slow motion,
+     large portrait, concierge-style booking overlay.
+     ===================================================================== -->
+<style>
+.c1 { background: var(--sand); color: var(--teal-ink); --pad: clamp(20px, 5vw, 72px); }
+.c1 .wrap { max-width: 1440px; margin: 0 auto; padding-inline: var(--pad); }
+.c1 .btn { display: inline-flex; align-items: center; gap: 12px; height: 54px; padding: 0 28px; background: var(--teal); color: var(--sand); font-size: 15px; letter-spacing: .02em; transition: background .4s var(--ease), transform .2s; white-space: nowrap; }
+.c1 .btn:hover { background: var(--teal-ink); }
+.c1 .btn:active { transform: translateY(1px); }
+.c1 .btn i { font-size: 18px; transition: transform .4s var(--ease); }
+.c1 .btn:hover i { transform: translateX(4px); }
+html[dir="rtl"] .c1 .btn:hover i { transform: translateX(-4px); }
+html[dir="rtl"] .c1 .flip { transform: scaleX(-1); }
+.c1 .link { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 15px; padding-block: 6px; }
+.c1 .link::after { content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 1px; background: currentColor; transform-origin: left; transition: transform .5s var(--ease); }
+html[dir="rtl"] .c1 .link::after { transform-origin: right; }
+.c1 .link:hover::after { transform: scaleX(.3); }
+
+/* nav */
+.c1-nav { position: fixed; z-index: 100; inset: 0 0 auto 0; height: 76px; transition: background .5s, border-color .5s; border-bottom: 1px solid transparent; }
+.c1-nav.is-solid { background: rgba(234, 216, 197, .92); backdrop-filter: blur(10px); border-color: var(--teal-15); }
+.c1-nav .wrap { height: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.c1-nav__links { display: flex; gap: 26px; font-size: 14px; white-space: nowrap; }
+.c1-nav__links a { opacity: .75; transition: opacity .3s; }
+.c1-nav__links a:hover { opacity: 1; }
+.c1-nav__logo img { height: 42px; width: auto; }
+.c1-nav__end { display: flex; justify-content: flex-end; align-items: center; gap: 22px; }
+.c1-lang { font-size: 14px; display: flex; gap: 6px; align-items: center; }
+.c1-lang button { opacity: .45; padding: 4px 2px; }
+.c1-lang button[aria-pressed="true"] { opacity: 1; border-bottom: 1px solid currentColor; }
+.c1-nav .btn { height: 44px; padding: 0 20px; font-size: 14px; }
+.c1-menu-btn { display: none; font-size: 26px; }
+@media (max-width: 1180px) {
+  .c1-nav .wrap { grid-template-columns: auto 1fr auto; }
+  .c1-nav__links, .c1-nav .btn { display: none; }
+  .c1-nav__logo { order: -1; }
+  .c1-menu-btn { display: block; }
+}
+
+/* hero */
+.c1-hero { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; position: relative; overflow: hidden; }
+.c1-hero__text { align-self: center; padding: 76px var(--pad) 0; padding-inline-start: max(var(--pad), calc((100vw - 1440px) / 2 + var(--pad))); position: relative; z-index: 2; }
+.c1-eyebrow { font-size: 13px; letter-spacing: .24em; text-transform: uppercase; margin-bottom: 28px; display: block; color: var(--teal); }
+.c1-hero h1 { font-weight: 300; font-size: clamp(40px, 4.7vw, 76px); line-height: 1.02; letter-spacing: -.035em; color: var(--teal); }
+html[lang="ar"] .c1-hero h1 { line-height: 1.3; font-size: clamp(42px, 5.6vw, 86px); font-weight: 400; }
+.c1-hero h1 strong { font-weight: 500; }
+.c1 .ln { display: block; overflow: hidden; padding-bottom: .06em; }
+.c1 .ln > span { display: block; white-space: nowrap; }
+@media (max-width: 520px) { .c1 .ln > span { white-space: normal; } }
+.c1-hero__sub { margin-top: 28px; max-width: 40ch; font-size: 17px; line-height: 1.7; color: var(--teal-ink); opacity: .82; }
+.c1-hero__cta { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
+.c1-hero__media { position: relative; height: 100%; min-height: 560px; display: flex; align-items: stretch; align-self: stretch; }
+.c1-hero__mark { position: absolute; width: 74%; top: 8%; inset-inline-end: 6%; opacity: .07; }
+/* full-height portrait: runs from the very top (behind the menu) to the bottom of the screen */
+.c1-hero__photo { position: relative; width: 100%; height: 100dvh; min-height: 560px; background: var(--sand); -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%); mask-image: linear-gradient(90deg, transparent, #000 12%); overflow: hidden; padding-top: 12px; display: flex; justify-content: center; align-items: flex-end; }
+html[dir="rtl"] .c1-hero__photo { -webkit-mask-image: linear-gradient(270deg, transparent, #000 12%); mask-image: linear-gradient(270deg, transparent, #000 12%); }
+.c1-hero__photo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; object-position: 50% 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+@media (max-width: 960px) {
+  .c1-hero { grid-template-columns: 1fr; align-items: start; }
+  .c1-hero__text { padding: 124px var(--pad) 24px; }
+  .c1-hero__media { min-height: 0; }
+  .c1-hero__photo { height: clamp(480px, 70vh, 620px); min-height: 0; padding-top: 0; align-items: center; -webkit-mask-image: none !important; mask-image: none !important; }
+  html[dir="rtl"] .c1-hero__photo { -webkit-mask-image: none !important; mask-image: none !important; }
+  .c1-hero__photo img { width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: 58% 100%; transform: scale(1.09) translateX(-3%); transform-origin: 5% 95%; -webkit-mask-image: none !important; mask-image: none !important; }
+}
+
+/* philosophy */
+.c1-philo { padding: clamp(110px, 18vh, 220px) 0; text-align: center; }
+.c1-philo blockquote { max-width: 1100px; margin: 0 auto; font-size: clamp(28px, 3.6vw, 54px); line-height: 1.25; font-weight: 300; letter-spacing: -.02em; }
+html[lang="ar"] .c1-philo blockquote { line-height: 1.7; }
+.c1-philo .w { color: var(--teal-15); transition: none; }
+.c1-philo cite { display: block; margin-top: 44px; font-style: normal; font-size: 15px; color: var(--teal); }
+
+/* elite shot */
+.c1-shot { background: var(--teal); color: var(--sand); padding: clamp(80px, 14vh, 160px) 0; overflow: hidden; }
+.c1-shot .wrap { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(32px, 6vw, 96px); align-items: end; }
+.c1-shot__label { font-size: 14px; opacity: .7; margin-bottom: 24px; display: block; }
+.c1-shot h2 { font-size: clamp(64px, 12vw, 200px); line-height: .88; font-weight: 300; letter-spacing: -.05em; }
+html[lang="ar"] .c1-shot h2 { line-height: 1.15; font-size: clamp(60px, 10vw, 170px); }
+.c1-shot h2 em { font-style: normal; font-weight: 600; display: block; }
+.c1-shot__lead { font-size: clamp(20px, 1.8vw, 26px); line-height: 1.5; font-weight: 300; margin-top: 40px; max-width: 30ch; }
+.c1-shot__figure { aspect-ratio: 3/4; overflow: hidden; position: relative; background: var(--teal-deep); }
+.c1-shot__figure img { width: 100%; height: 125%; object-fit: cover; object-position: 50% 12%; }
+.c1-shot__nots { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); margin-top: clamp(48px, 8vh, 96px); border-top: 1px solid var(--sand-20); }
+.c1-shot__nots li { padding: 28px 0 0; padding-inline-end: 24px; font-size: 15px; line-height: 1.6; opacity: .85; }
+.c1-shot__nots strong { display: block; font-weight: 500; font-size: 22px; margin-bottom: 6px; opacity: 1; }
+@media (max-width: 860px) {
+  .c1-shot .wrap { grid-template-columns: 1fr; }
+  .c1-shot__figure { aspect-ratio: 4/3; }
+  .c1-shot__nots { grid-template-columns: 1fr; }
+}
+
+/* elite index */
+.c1-index { padding: clamp(100px, 16vh, 180px) 0; }
+.c1-index h2 { font-size: clamp(34px, 4vw, 60px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); max-width: 18ch; line-height: 1.1; }
+html[lang="ar"] .c1-index h2 { line-height: 1.5; }
+.c1-index__list { margin-top: 64px; border-top: 1px solid var(--teal-15); }
+.c1-row { border-bottom: 1px solid var(--teal-15); }
+.c1-row__head { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto 48px; gap: 24px; align-items: baseline; padding: 30px 0; text-align: start; }
+.c1-row__name { font-size: clamp(30px, 4.4vw, 68px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); transition: transform .6s var(--ease); }
+.c1-row__head:hover .c1-row__name { transform: translateX(14px); }
+html[dir="rtl"] .c1-row__head:hover .c1-row__name { transform: translateX(-14px); }
+.c1-row__tag { font-size: 14px; opacity: .7; }
+.c1-row__icon { font-size: 26px; color: var(--teal); transition: transform .5s var(--ease); justify-self: end; }
+.c1-row.is-open .c1-row__icon { transform: rotate(45deg); }
+.c1-row__body { height: 0; overflow: hidden; }
+.c1-row__inner { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; padding: 0 0 40px; }
+.c1-row__inner p { font-size: 18px; line-height: 1.7; max-width: 52ch; }
+.c1-row__inner ul { font-size: 15px; line-height: 2; opacity: .8; }
+.c1-row__inner ul li::before { content: "+ "; color: var(--teal); }
+@media (max-width: 760px) { .c1-row__inner { grid-template-columns: 1fr; gap: 20px; } .c1-row__tag { display: none; } .c1-row__head { grid-template-columns: 1fr 40px; } }
+.c1-note { margin-top: 32px; font-size: 13px; opacity: .65; max-width: 70ch; line-height: 1.6; }
+
+/* shared section heading */
+.c1-h2 { font-size: clamp(34px, 4vw, 60px); font-weight: 300; letter-spacing: -.03em; line-height: 1.1; color: var(--teal); max-width: 20ch; }
+html[lang="ar"] .c1-h2 { line-height: 1.5; }
+.c1-sec { padding: clamp(100px, 16vh, 180px) 0; }
+
+/* credentials strip */
+.c1-creds { border-block: 1px solid var(--teal-15); }
+.c1-creds ul { display: grid; grid-template-columns: repeat(4, 1fr); }
+.c1-creds li { padding: 34px 0; padding-inline-end: 28px; display: flex; flex-direction: column; gap: 8px; }
+.c1-creds li + li { padding-inline-start: 28px; border-inline-start: 1px solid var(--teal-15); }
+.c1-creds .k { font-size: 13px; opacity: .6; }
+.c1-creds .v { font-size: 18px; line-height: 1.45; color: var(--teal); }
+@media (max-width: 860px) { .c1-creds ul { grid-template-columns: 1fr 1fr; } .c1-creds li:nth-child(3) { padding-inline-start: 0; border-inline-start: 0; } .c1-creds li:nth-child(n+3) { border-top: 1px solid var(--teal-15); } }
+@media (max-width: 480px) { .c1-creds ul { grid-template-columns: 1fr; } .c1-creds li + li { padding-inline-start: 0; border-inline-start: 0; border-top: 1px solid var(--teal-15); } }
+
+/* about */
+.c1-about .wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 7vw, 120px); align-items: center; }
+.c1-about__portrait { position: relative; aspect-ratio: 4/5; overflow: hidden; background: var(--sand); }
+.c1-about__portrait img { position: absolute; top: 4%; left: -30%; width: 160%; max-width: none; height: auto; }
+.c1-about__lead { margin-top: 32px; font-size: clamp(20px, 1.7vw, 24px); line-height: 1.55; font-weight: 300; color: var(--teal-ink); max-width: 40ch; }
+.c1-about__body > p:not(.c1-about__lead) { margin-top: 20px; font-size: 16px; line-height: 1.85; max-width: 52ch; opacity: .85; }
+.c1-principles { margin-top: 44px; border-top: 1px solid var(--teal-15); }
+.c1-principles li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px; padding: 20px 0; border-bottom: 1px solid var(--teal-15); }
+.c1-principles b { font-weight: 400; font-size: 19px; color: var(--teal); }
+.c1-principles span { font-size: 15px; line-height: 1.6; opacity: .8; }
+.c1-about__sign { margin-top: 40px; display: flex; align-items: center; gap: 16px; }
+.c1-about__sign img { width: 44px; height: auto; }
+.c1-about__sign b { display: block; font-weight: 500; font-size: 16px; }
+.c1-about__sign small { font-size: 13px; opacity: .7; }
+@media (max-width: 860px) { .c1-about .wrap { grid-template-columns: 1fr; } .c1-principles li { grid-template-columns: 1fr; gap: 6px; } }
+
+/* the difference */
+.c1-diff { background: var(--sand-soft); }
+.c1-diff__grid { margin-top: 64px; display: grid; grid-template-columns: 1fr 1fr; }
+.c1-diff__col { padding: clamp(28px, 4vw, 56px); }
+.c1-diff__col h3 { font-size: 15px; font-weight: 400; margin-bottom: 28px; opacity: .7; }
+.c1-diff__col li { display: flex; align-items: center; gap: 16px; padding: 18px 0; font-size: clamp(18px, 1.6vw, 22px); font-weight: 300; border-bottom: 1px solid var(--teal-15); }
+.c1-diff__col li:last-child { border-bottom: 0; }
+.c1-diff__col i { font-size: 20px; flex: none; }
+.c1-diff__col--old { border: 1px solid var(--teal-15); color: rgba(1, 46, 42, .55); }
+.c1-diff__col--old .t { position: relative; }
+.c1-diff__col--old .t::after { content: ""; position: absolute; inset-inline: 0; top: 55%; height: 1px; background: currentColor; transform: scaleX(var(--strike, 1)); transform-origin: left; }
+html[dir="rtl"] .c1-diff__col--old .t::after { transform-origin: right; }
+.c1-diff__col--new { background: var(--teal); color: var(--sand); }
+.c1-diff__col--new h3 { opacity: .8; }
+.c1-diff__col--new li { border-color: var(--sand-20); }
+@media (max-width: 760px) { .c1-diff__grid { grid-template-columns: 1fr; } }
+
+/* elite process */
+.c1-process__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 7vw, 120px); align-items: start; }
+.c1-process__aside { position: sticky; top: 110px; }
+.c1-process__aside > p { margin-top: 20px; font-size: 17px; line-height: 1.7; opacity: .8; max-width: 36ch; }
+.c1-process__fig { position: relative; margin-top: 40px; aspect-ratio: 4/3.4; overflow: hidden; background: var(--sand); }
+.c1-process__fig img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .9s var(--ease); }
+.c1-process__fig img.is-on { opacity: 1; }
+.c1-process__bar { margin-top: 24px; height: 1px; background: var(--teal-15); position: relative; }
+.c1-process__bar span { position: absolute; inset: 0; background: var(--teal); transform-origin: left; transform: scaleX(0); }
+html[dir="rtl"] .c1-process__bar span { transform-origin: right; }
+.c1-pstep { min-height: 62vh; display: flex; flex-direction: column; justify-content: center; padding: 48px 0; border-top: 1px solid var(--teal-15); opacity: .35; transition: opacity .6s var(--ease); }
+.c1-pstep.is-on { opacity: 1; }
+.c1-pstep__n { font-size: 14px; color: var(--teal); }
+.c1-pstep h3 { margin-top: 14px; font-size: clamp(32px, 3.4vw, 52px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); line-height: 1.1; }
+html[lang="ar"] .c1-pstep h3 { line-height: 1.5; }
+.c1-pstep p { margin-top: 18px; font-size: 17px; line-height: 1.75; max-width: 46ch; }
+.c1-pstep ul { margin-top: 22px; display: grid; gap: 8px; font-size: 14px; opacity: .8; }
+.c1-pstep ul li { display: flex; gap: 10px; align-items: center; }
+.c1-pstep ul i { color: var(--teal); }
+.c1-process__cta { padding-top: 40px; border-top: 1px solid var(--teal-15); }
+@media (max-width: 860px) {
+  .c1-process__grid { grid-template-columns: 1fr; }
+  .c1-process__aside { position: static; }
+  .c1-process__fig, .c1-process__bar { display: none; }
+  .c1-pstep { min-height: 0; opacity: 1; }
+}
+
+/* journal */
+.c1-journal__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap; }
+.c1-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.c1-tabs button { height: 40px; padding: 0 16px; font-size: 14px; border: 1px solid var(--teal-15); transition: background .3s, color .3s, border-color .3s; }
+.c1-tabs button:hover { border-color: var(--teal-50); }
+.c1-tabs button[aria-pressed="true"] { background: var(--teal); color: var(--sand); border-color: var(--teal); }
+.c1-journal__grid { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+.c1-journal__grid.no-feature { grid-template-columns: 1fr; }
+.c1-feature__img { aspect-ratio: 16/11; overflow: hidden; position: relative; background: var(--sand); }
+.c1-feature__img img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; transition: transform 1.2s var(--ease); }
+.c1-feature:hover .c1-feature__img img { transform: scale(1.04); }
+.c1-meta { display: block; margin-top: 24px; font-size: 13px; opacity: .65; }
+.c1-feature h3 { margin-top: 10px; font-size: clamp(26px, 2.6vw, 38px); font-weight: 300; letter-spacing: -.02em; line-height: 1.2; color: var(--teal); }
+html[lang="ar"] .c1-feature h3 { line-height: 1.6; }
+.c1-feature p { margin-top: 14px; font-size: 16px; line-height: 1.75; opacity: .8; max-width: 52ch; }
+.c1-feature .link { margin-top: 20px; }
+.c1-posts { border-top: 1px solid var(--teal-15); }
+.c1-post a { display: grid; grid-template-columns: minmax(0, 1fr) 32px; gap: 16px; align-items: center; padding: 26px 0; border-bottom: 1px solid var(--teal-15); }
+.c1-post .c1-meta { margin-top: 0; }
+.c1-post h3 { margin-top: 8px; font-size: 21px; font-weight: 400; line-height: 1.4; transition: color .3s; }
+.c1-post i { font-size: 22px; color: var(--teal); transition: transform .5s var(--ease); }
+html[dir="rtl"] .c1-post i { transform: scaleX(-1); }
+.c1-post a:hover h3 { color: var(--teal); }
+.c1-post a:hover i { transform: translateX(6px); }
+html[dir="rtl"] .c1-post a:hover i { transform: scaleX(-1) translateX(6px); }
+.c1-journal__empty { display: none; padding: 32px 0; font-size: 15px; opacity: .7; }
+.c1-journal__empty.show { display: block; }
+.c1-journal__all { margin-top: 40px; }
+@media (max-width: 860px) { .c1-journal__grid { grid-template-columns: 1fr; } }
+
+/* clinics */
+.c1-clinics { background: var(--sand-soft); padding: clamp(100px, 16vh, 180px) 0; }
+.c1-clinics h2 { font-size: clamp(34px, 4vw, 60px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); line-height: 1.1; }
+html[lang="ar"] .c1-clinics h2 { line-height: 1.5; }
+.c1-clinics__grid { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 72px; }
+.c1-clinic { padding: 40px 0; padding-inline-end: 40px; border-top: 1px solid var(--teal); display: flex; flex-direction: column; gap: 16px; }
+.c1-clinic + .c1-clinic { padding-inline-start: 40px; border-inline-start: 1px solid var(--teal-15); }
+.c1-clinic h3 { font-size: clamp(34px, 3.6vw, 54px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); }
+.c1-clinic p { font-size: 15px; line-height: 1.7; opacity: .8; flex: 1; }
+@media (max-width: 860px) { .c1-clinics__grid { grid-template-columns: 1fr; } .c1-clinic + .c1-clinic { padding-inline-start: 0; border-inline-start: 0; } }
+
+/* faq */
+.c1-faq { padding: clamp(100px, 16vh, 180px) 0; }
+.c1-faq .wrap { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 64px; }
+.c1-faq h2 { font-size: clamp(34px, 3.6vw, 52px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); }
+.c1-faq details { border-bottom: 1px solid var(--teal-15); }
+.c1-faq summary { list-style: none; cursor: pointer; padding: 26px 0; display: flex; justify-content: space-between; gap: 24px; font-size: 20px; }
+.c1-faq summary::-webkit-details-marker { display: none; }
+.c1-faq summary i { color: var(--teal); transition: transform .4s var(--ease); }
+.c1-faq details[open] summary i { transform: rotate(45deg); }
+.c1-faq details p { padding-bottom: 28px; font-size: 16px; line-height: 1.8; max-width: 60ch; opacity: .85; }
+@media (max-width: 860px) { .c1-faq .wrap { grid-template-columns: 1fr; gap: 32px; } }
+
+/* closing */
+.c1-close { background: var(--teal-ink); color: var(--sand); padding: clamp(100px, 18vh, 200px) 0 48px; }
+.c1-sig { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.c1-sig__face { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; background: var(--sand); }
+.c1-sig__face img { width: 100%; height: 100%; }
+.c1-sig__quote { margin-top: 40px; max-width: 22ch; text-wrap: balance; font-size: clamp(36px, 4.6vw, 72px); font-weight: 300; line-height: 1.15; letter-spacing: -.03em; }
+html[lang="ar"] .c1-sig__quote { line-height: 1.6; max-width: 20ch; }
+.c1-sig__name { margin-top: 36px; display: flex; flex-direction: column; gap: 4px; }
+.c1-sig__name b { font-weight: 500; font-size: 17px; }
+.c1-sig__name span { font-size: 14px; opacity: .65; }
+.c1-close .btn { background: var(--sand); color: var(--teal-ink); margin-top: 44px; }
+.c1-close .btn:hover { background: #fff8f0; }
+.c1-foot { margin-top: clamp(90px, 16vh, 180px); font-size: 14px; }
+.c1-foot__top { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.6fr); gap: 40px; padding-top: 48px; border-top: 1px solid var(--sand-20); }
+.c1-foot__brand img { height: 52px; width: auto; }
+.c1-foot__brand p { margin-top: 20px; line-height: 1.7; opacity: .65; max-width: 30ch; }
+.c1-foot h4 { font-size: 13px; font-weight: 400; opacity: .55; margin-bottom: 16px; }
+.c1-foot li { padding: 5px 0; }
+.c1-foot li a, .c1-foot li button { opacity: .85; transition: opacity .3s; text-align: start; }
+.c1-foot li a:hover, .c1-foot li button:hover { opacity: 1; }
+.c1-news p { line-height: 1.6; opacity: .65; margin-bottom: 16px; max-width: 34ch; }
+.c1-news__row { display: flex; border-bottom: 1px solid var(--sand-60); }
+.c1-news__row label { flex: 1; }
+.c1-news input { width: 100%; height: 48px; border: 0; background: transparent; color: var(--sand); font-size: 15px; outline: none; }
+.c1-news input::placeholder { color: rgba(234, 216, 197, .55); }
+.c1-news button { padding: 0 4px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; color: var(--sand); }
+.c1-news__row:focus-within { border-color: var(--sand); }
+.c1-news__msg { display: block; min-height: 1.4em; margin-top: 10px; font-size: 13px; }
+.c1-news__msg.err { color: #F3C2B3; }
+.c1-foot__bottom { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--sand-20); display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: 13px; }
+.c1-foot__bottom p { opacity: .55; max-width: 70ch; line-height: 1.6; }
+.c1-foot__bottom nav { display: flex; gap: 22px; opacity: .8; }
+@media (max-width: 1100px) { .c1-foot__top { grid-template-columns: repeat(3, minmax(0, 1fr)); } .c1-foot__brand, .c1-news { grid-column: 1 / -1; } }
+@media (max-width: 560px) { .c1-foot__top { grid-template-columns: 1fr 1fr; } .c1-foot__bottom { padding-bottom: 70px; } }
+
+
+/* compare (inside the Elite family section) */
+.c1-compare { margin-top: clamp(80px, 12vh, 140px); }
+.c1-compare__scroll { margin-top: 48px; overflow-x: auto; border-top: 1px solid var(--teal); }
+.c1-compare table { width: 100%; min-width: 880px; border-collapse: collapse; }
+.c1-compare th, .c1-compare td { text-align: start; padding: 22px 16px; vertical-align: middle; border-bottom: 1px solid var(--teal-15); font-size: 15px; line-height: 1.55; }
+.c1-compare thead th { font-size: 13px; font-weight: 400; opacity: .6; padding-block: 16px; }
+.c1-compare tbody th { font-size: 24px; font-weight: 300; color: var(--teal); letter-spacing: -.02em; white-space: nowrap; }
+.c1-compare tbody th small { display: block; margin-top: 2px; font-size: 12px; color: var(--teal-ink); opacity: .6; letter-spacing: 0; }
+.c1-compare tr.is-core { background: var(--sand-soft); }
+.c1-compare .core { display: inline-block; margin-inline-start: 10px; padding: 2px 8px; font-size: 11px; letter-spacing: .04em; background: var(--teal); color: var(--sand); vertical-align: middle; }
+.c1-lvl { display: inline-flex; gap: 4px; }
+.c1-lvl i { width: 10px; height: 10px; border: 1px solid var(--teal); }
+.c1-lvl i.on { background: var(--teal); }
+.c1-yes { display: inline-flex; align-items: center; gap: 6px; color: var(--teal); }
+.c1-no { opacity: .45; }
+.c1-compare__foot { margin-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+.c1-compare__foot p { font-size: 13px; opacity: .65; max-width: 60ch; line-height: 1.6; }
+
+/* quiz */
+.c1-quiz { position: relative; overflow: hidden; background: var(--teal-ink); color: var(--sand); }
+.c1-quiz__mark { position: absolute; z-index: 0; top: 50%; inset-inline-start: -6%; height: 125%; width: auto; transform: translateY(-50%); opacity: .06; pointer-events: none; }
+.c1-quiz .wrap { position: relative; z-index: 1; }
+.c1-quiz .c1-h2 { color: var(--sand); margin-inline: auto; }
+.c1-quiz__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(40px, 6vw, 96px); align-items: center; }
+/* both columns: content centered horizontally and vertically */
+.c1-quiz__intro, .c1-quiz__panel { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.c1-quiz__intro p { margin: 22px auto 0; font-size: 17px; line-height: 1.7; opacity: .8; max-width: 40ch; }
+.c1-quiz__bars { display: flex; gap: 6px; margin: 40px auto 0; width: 100%; max-width: 300px; }
+.c1-quiz__bars span { flex: 1; height: 2px; background: var(--sand-20); transition: background .5s var(--ease); }
+.c1-quiz__bars span.on { background: var(--sand); }
+.c1-quiz__panel { min-height: 480px; justify-content: center; padding: clamp(32px, 4vw, 56px) clamp(20px, 3vw, 48px); border: 1px solid var(--sand-20); background: rgba(234, 216, 197, .03); }
+.c1-quiz__count { font-size: 13px; opacity: .6; }
+.c1-quiz__q { margin-top: 14px; font-size: clamp(26px, 2.6vw, 38px); font-weight: 300; letter-spacing: -.02em; line-height: 1.25; max-width: 22ch; }
+html[lang="ar"] .c1-quiz__q { line-height: 1.6; }
+.c1-quiz__opts { width: 100%; max-width: 460px; margin-top: 30px; border-top: 1px solid var(--sand-20); }
+.c1-qopt { position: relative; width: 100%; display: flex; justify-content: center; align-items: center; padding: 20px 44px; border-bottom: 1px solid var(--sand-20); font-size: clamp(18px, 1.6vw, 21px); font-weight: 300; text-align: center; color: var(--sand); transition: background .4s var(--ease); }
+.c1-qopt i { position: absolute; inset-inline-end: 14px; top: 50%; translate: 0 -50%; opacity: 0; transition: opacity .3s, transform .4s var(--ease); }
+.c1-qopt:hover { background: rgba(234, 216, 197, .07); }
+.c1-qopt:hover i { opacity: 1; transform: translateX(3px); }
+html[dir="rtl"] .c1-qopt i { transform: scaleX(-1); }
+html[dir="rtl"] .c1-qopt:hover i { transform: scaleX(-1) translateX(3px); }
+.c1-quiz__back { margin-top: 24px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--sand); opacity: .75; }
+.c1-quiz__back:hover { opacity: 1; }
+.c1-quiz__rec { margin-top: 10px; font-size: clamp(52px, 6vw, 92px); font-weight: 300; letter-spacing: -.045em; line-height: 1; }
+.c1-quiz__promise { margin: 22px auto 0; font-size: 19px; line-height: 1.6; max-width: 36ch; }
+.c1-quiz__why { margin: 12px auto 0; font-size: 15px; line-height: 1.7; opacity: .75; max-width: 42ch; }
+.c1-quiz__actions { margin-top: 34px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 28px; }
+.c1-quiz .btn { background: var(--sand); color: var(--teal-ink); }
+.c1-quiz .btn:hover { background: #fff8f0; }
+.c1-quiz__note { margin: 26px auto 0; font-size: 12px; opacity: .55; max-width: 48ch; line-height: 1.6; }
+@media (max-width: 860px) { .c1-quiz__grid { grid-template-columns: 1fr; } .c1-quiz__panel { min-height: 0; } .c1-quiz__mark { height: 80%; } }
+
+/* results */
+.c1-results { border-top: 1px solid var(--teal-15); }
+.c1-results__grid { margin-top: 56px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 6vw, 100px); align-items: start; }
+.c1-ba { position: relative; aspect-ratio: 4/5; overflow: hidden; --pos: 50%; user-select: none; }
+.c1-ba__img { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; padding: 22px; font-size: 13px; color: var(--teal-ink); }
+.c1-ba__img i { font-size: 28px; color: var(--teal); margin-bottom: 6px; }
+.c1-ba__img small { opacity: .6; }
+.c1-ba__img b, .c1-ba__img small { max-width: 44%; }
+.c1-ba__before { background: repeating-linear-gradient(135deg, transparent 0 14px, var(--teal-08) 14px 15px), var(--sand-soft); }
+.c1-ba__after { align-items: flex-end; text-align: end; background: repeating-linear-gradient(135deg, transparent 0 14px, var(--teal-15) 14px 15px), var(--sand-deep); clip-path: inset(0 0 0 var(--pos)); }
+.c1-ba__line { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 1px; background: var(--teal); pointer-events: none; }
+.c1-ba__handle { position: absolute; top: 50%; left: var(--pos); width: 44px; height: 44px; transform: translate(-50%, -50%); display: grid; place-items: center; background: var(--teal); color: var(--sand); font-size: 18px; pointer-events: none; }
+.c1-ba input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.c1-ba input:focus-visible ~ .c1-ba__handle { outline: 2px solid var(--teal-ink); outline-offset: 3px; }
+.c1-ba__tag { position: absolute; top: 18px; inset-inline-start: 18px; padding: 6px 12px; font-size: 12px; background: var(--teal); color: var(--sand); pointer-events: none; }
+.c1-results figcaption { margin-top: 14px; font-size: 13px; opacity: .65; }
+.c1-reviews blockquote { padding: 30px 0; border-bottom: 1px solid var(--teal-15); }
+.c1-reviews blockquote:first-child { padding-top: 0; }
+.c1-reviews blockquote p { font-size: clamp(20px, 1.8vw, 26px); font-weight: 300; line-height: 1.5; letter-spacing: -.01em; color: var(--teal); }
+html[lang="ar"] .c1-reviews blockquote p { line-height: 1.8; }
+.c1-reviews footer { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px; }
+.c1-reviews footer b { font-weight: 500; }
+.c1-reviews footer > span { padding: 4px 10px; border: 1px solid var(--teal-15); font-size: 12px; color: var(--teal); }
+.c1-reviews .link { margin-top: 28px; }
+@media (max-width: 860px) { .c1-results__grid { grid-template-columns: 1fr; } }
+
+/* clinics: schedule */
+.c1-clinic__meta { display: grid; gap: 10px; padding: 18px 0; border-block: 1px solid var(--teal-15); font-size: 14px; }
+.c1-clinic__meta div { display: flex; justify-content: space-between; gap: 16px; }
+.c1-clinic__meta dt { opacity: .6; }
+.c1-clinic__meta dd { margin: 0; color: var(--teal); text-align: end; }
+.c1-clinic__actions { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+
+/* floating WhatsApp */
+/* official WhatsApp mark: brand green is the one intentional exception to the palette */
+.wa-ico { width: 1.15em; height: 1.15em; fill: #25D366; flex: none; }
+.c1-wa { position: fixed; z-index: 120; bottom: 22px; inset-inline-start: 22px; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: #25D366; box-shadow: 0 10px 26px rgba(37, 211, 102, .35), 0 2px 6px rgba(1, 46, 42, .2); opacity: 0; transform: translateY(12px) scale(.9); pointer-events: none; transition: opacity .4s var(--ease), transform .4s var(--ease), background .3s; }
+.c1-wa .wa-ico { width: 30px; height: 30px; fill: #fff; }
+.c1-wa.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.c1-wa:hover { background: #1EBE5D; transform: scale(1.06); }
+
+/* closing: second action */
+.c1-sig__cta { margin-top: 44px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 28px; }
+.c1-close .c1-sig__cta .btn { margin-top: 0; }
+
+/* footer additions */
+.c1-foot li small { display: block; font-size: 12px; opacity: .55; margin-top: 2px; }
+.c1-foot__contact { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.c1-foot__contact a { display: inline-flex; align-items: center; gap: 10px; opacity: .85; }
+.c1-foot__contact a:hover { opacity: 1; }
+.c1-foot__bottom strong { font-weight: 500; opacity: 1; }
+
+/* booking: health step + confirmation actions */
+.c1-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.c1-chip { height: 44px; padding: 0 16px; border: 1px solid var(--teal-15); font-size: 15px; transition: background .3s, color .3s, border-color .3s; }
+.c1-chip:hover { border-color: var(--teal-50); }
+.c1-chip[aria-pressed="true"] { background: var(--teal); color: var(--sand); border-color: var(--teal); }
+.c1-hint { margin-top: 18px; padding: 14px 16px; background: var(--sand-soft); font-size: 14px; line-height: 1.6; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.c1-hint .link { font-size: 14px; color: var(--teal); }
+.c1-check { margin-top: 26px; display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.6; max-width: 56ch; cursor: pointer; }
+.c1-check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--teal); flex: none; }
+.c1-cc__note { margin-top: 16px; font-size: 13px; opacity: .6; }
+.c1-done__actions { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 10px 26px; }
+
+/* concierge overlay */
+.c1-cc { position: fixed; inset: 0; z-index: 300; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); background: var(--sand); visibility: hidden; }
+.c1-cc.is-open { visibility: visible; }
+.c1-cc__aside { position: relative; }
+.c1-cc__aside img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+.c1-cc__aside p { z-index: 1; }
+.c1-cc__aside p { position: absolute; inset: auto 40px 40px; color: var(--teal-ink); padding: 18px 22px; background: rgba(234,216,197,.88); font-size: 22px; line-height: 1.5; font-weight: 300; max-width: 22ch; }
+.c1-cc__main { position: relative; overflow-y: auto; padding: 32px clamp(24px, 6vw, 96px) 120px; display: flex; flex-direction: column; }
+.c1-cc__top { display: flex; justify-content: space-between; align-items: center; margin-bottom: clamp(32px, 8vh, 80px); }
+.c1-cc__progress { flex: 1; height: 1px; background: var(--teal-15); margin-inline-end: 32px; position: relative; }
+.c1-cc__progress span { position: absolute; inset: 0; background: var(--teal); transform-origin: left; transform: scaleX(.25); transition: transform .8s var(--ease); }
+html[dir="rtl"] .c1-cc__progress span { transform-origin: right; }
+.c1-cc__close { font-size: 28px; color: var(--teal); }
+.c1-cc h3 { font-size: clamp(30px, 3.4vw, 50px); font-weight: 300; letter-spacing: -.03em; color: var(--teal); line-height: 1.15; margin-bottom: 40px; }
+html[lang="ar"] .c1-cc h3 { line-height: 1.5; }
+.c1-opt { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; border-bottom: 1px solid var(--teal-15); text-align: start; font-size: clamp(20px, 2vw, 28px); font-weight: 300; transition: padding .5s var(--ease), color .3s; }
+.c1-opt small { font-size: 14px; opacity: .65; display: block; margin-top: 4px; }
+.c1-opt i { opacity: 0; transition: opacity .3s; color: var(--teal); }
+.c1-opt:hover { padding-inline-start: 14px; color: var(--teal); }
+.c1-opt[aria-pressed="true"] { color: var(--teal); padding-inline-start: 14px; }
+.c1-opt[aria-pressed="true"] i { opacity: 1; }
+.c1-days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
+.c1-day { flex: 0 0 auto; width: 76px; padding: 14px 0; text-align: center; border: 1px solid var(--teal-15); line-height: 1.3; transition: background .3s, color .3s; }
+.c1-day b { display: block; font-size: 24px; font-weight: 400; }
+.c1-day small { font-size: 12px; opacity: .7; }
+.c1-day[aria-pressed="true"] { background: var(--teal); color: var(--sand); border-color: var(--teal); }
+.c1-times { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 28px; }
+.c1-time { height: 48px; border: 1px solid var(--teal-15); transition: background .3s, color .3s; }
+.c1-time[aria-pressed="true"] { background: var(--teal); color: var(--sand); }
+.c1-time:disabled { opacity: .3; text-decoration: line-through; cursor: not-allowed; }
+.c1-sub { font-size: 14px; margin: 36px 0 12px; opacity: .7; }
+.c1-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; max-width: 520px; }
+.c1-field label { font-size: 14px; }
+.c1-field input { height: 54px; border: 0; border-bottom: 1px solid var(--teal-50); background: transparent; font-size: 20px; padding: 0; outline: none; }
+.c1-field input:focus { border-color: var(--teal); box-shadow: 0 1px 0 var(--teal); }
+.c1-field input::placeholder { color: var(--teal-50); }
+.c1-cc__nav { margin-top: 48px; display: flex; gap: 28px; align-items: center; }
+.c1-cc__err { font-size: 14px; color: #A0322A; min-height: 1.4em; margin-top: 16px; }
+.c1-summary { font-size: 16px; line-height: 2; margin-bottom: 32px; padding: 20px 0; border-block: 1px solid var(--teal-15); }
+.c1-summary b { font-weight: 500; color: var(--teal); }
+.c1-success h3 { margin-bottom: 20px; }
+.c1-success p { font-size: 17px; line-height: 1.8; max-width: 46ch; }
+.c1-ref { margin-top: 28px; font-size: 14px; }
+.c1-ref b { font-size: 26px; font-weight: 400; color: var(--teal); display: block; letter-spacing: .08em; }
+@media (max-width: 860px) { .c1-cc { grid-template-columns: 1fr; } .c1-cc__aside { display: none; } }
+
+/* mobile menu */
+.c1-mm { position: fixed; inset: 0; z-index: 250; background: var(--teal); color: var(--sand); padding: 100px var(--pad) 40px; display: none; flex-direction: column; gap: 8px; }
+.c1-mm.is-open { display: flex; }
+.c1-mm a { font-size: 34px; font-weight: 300; padding: 8px 0; }
+.c1-mm .btn { margin-top: auto; background: var(--sand); color: var(--teal-ink); justify-content: center; }
+.c1-mm__x { position: absolute; top: 22px; inset-inline-end: var(--pad); font-size: 28px; }
+</style>
+
+<main class="concept c1" id="c1" data-concept="c1">
+  <header class="c1-nav">
+    <div class="wrap">
+      <nav class="c1-nav__links" aria-label="Primary">
+        <a href="#c1-about"><span class="en">About</span><span class="ar">عن د. هدى</span></a>
+        <a href="#c1-shot"><span class="en">The Elite method</span><span class="ar">منهج إيليت</span></a>
+        <a href="#c1-results"><span class="en">Results</span><span class="ar">النتائج</span></a>
+        <a href="#c1-journal"><span class="en">Journal</span><span class="ar">المقالات</span></a>
+        <a href="#c1-clinics"><span class="en">Clinics</span><span class="ar">العيادات</span></a>
+      </nav>
+      <a class="c1-nav__logo" href="#c1" aria-label="Dr. Hoda Hatem"><img src="assets/logo.png" alt="Dr. Hoda Hatem"></a>
+      <div class="c1-nav__end">
+        <div class="c1-lang" data-lang-switch>
+          <button data-set-lang="en" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button data-set-lang="ar" aria-pressed="false">عربي</button>
+        </div>
+        <button class="btn" data-book><span class="en">Book an Appointment</span><span class="ar">احجز موعدك</span></button>
+        <button class="c1-menu-btn" data-c1-menu aria-label="Menu"><i class="ph-light ph-list"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="c1-mm" data-c1-mm>
+    <button class="c1-mm__x" data-c1-menu-close aria-label="Close"><i class="ph-light ph-x"></i></button>
+    <a data-c1-menu-close href="#c1-about"><span class="en">About</span><span class="ar">عن د. هدى</span></a>
+    <a data-c1-menu-close href="#c1-shot"><span class="en">The Elite method</span><span class="ar">منهج إيليت</span></a>
+    <a data-c1-menu-close href="#c1-quiz"><span class="en">Which Elite suits me?</span><span class="ar">أنهي إيليت تناسبني؟</span></a>
+    <a data-c1-menu-close href="#c1-process"><span class="en">Process</span><span class="ar">الرحلة</span></a>
+    <a data-c1-menu-close href="#c1-results"><span class="en">Results</span><span class="ar">النتائج</span></a>
+    <a data-c1-menu-close href="#c1-journal"><span class="en">Journal</span><span class="ar">المقالات</span></a>
+    <a data-c1-menu-close href="#c1-clinics"><span class="en">Clinics</span><span class="ar">العيادات</span></a>
+    <button class="btn" data-book data-c1-menu-close><span class="en">Book an Appointment</span><span class="ar">احجز موعدك</span></button>
+  </div>
+
+  <!-- HERO -->
+  <section class="c1-hero">
+    <div class="c1-hero__text">
+      <span class="c1-eyebrow"><span class="en">Dr. Hoda Hatem</span><span class="ar">د. هدى حاتم</span></span>
+      <h1>
+        <span class="ln"><span><span class="en">Weight loss,</span><span class="ar">وزن أقل،</span></span></span>
+        <span class="ln"><span><span class="en"><strong>without the diet.</strong></span><span class="ar"><strong>من غير رجيم.</strong></span></span></span>
+      </h1>
+      <p class="c1-hero__sub" data-fade>
+        <span class="en">Non-surgical Elite techniques built around appetite. Personally led by Dr. Hoda in Tanta, Zagazig and Cairo.</span>
+        <span class="ar">تقنيات إيليت غير الجراحية، تبدأ من الشهية لا من الحرمان. بإشراف د. هدى شخصيًا في طنطا والزقازيق والقاهرة.</span>
+      </p>
+      <div class="c1-hero__cta" data-fade>
+        <button class="btn" data-book><span class="en">Book an Appointment</span><span class="ar">احجز موعدك</span><i class="ph-light ph-arrow-right flip"></i></button>
+        <a class="link" href="#c1-shot"><span class="en">Discover Elite Shot</span><span class="ar">تعرّف على إيليت شوت</span></a>
+      </div>
+    </div>
+    <div class="c1-hero__media">
+      <img class="c1-hero__mark" src="assets/logo-mark.png" alt="" aria-hidden="true">
+      <figure class="c1-hero__photo"><img class="melt" src="pics/website.png" alt="Dr. Hoda Hatem seated in her clinic"></figure>
+    </div>
+  </section>
+
+  <!-- CREDENTIALS -->
+  <section class="c1-creds" aria-label="Dr. Hoda Hatem in brief">
+    <div class="wrap">
+      <ul data-stagger>
+        <li><span class="k"><span class="en">Specialty</span><span class="ar">التخصص</span></span><span class="v"><span class="en">Nutrition and weight management</span><span class="ar">التغذية وعلاج السمنة</span></span></li>
+        <li><span class="k"><span class="en">Method</span><span class="ar">المنهج</span></span><span class="v"><span class="en">Creator of the Elite techniques</span><span class="ar">صاحبة تقنيات إيليت</span></span></li>
+        <li><span class="k"><span class="en">Approach</span><span class="ar">النهج</span></span><span class="v"><span class="en">Non-surgical, appetite-led</span><span class="ar">غير جراحي، يبدأ من الشهية</span></span></li>
+        <li><span class="k"><span class="en">Clinics</span><span class="ar">العيادات</span></span><span class="v"><span class="en">Tanta, Zagazig, Cairo</span><span class="ar">طنطا، الزقازيق، القاهرة</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="c1-about c1-sec" id="c1-about">
+    <div class="wrap">
+      <figure class="c1-about__portrait"><img class="melt" src="pics/website-2.jpg" alt="Portrait of Dr. Hoda Hatem"></figure>
+      <div class="c1-about__body" data-fade>
+        <h2 class="c1-h2"><span class="en">A doctor first. Then a method.</span><span class="ar">طبيبة أولًا، ثم منهج.</span></h2>
+        <p class="c1-about__lead"><span class="en">Dr. Hoda Hatem is a nutrition and weight-management specialist, and the creator of the Elite techniques.</span><span class="ar">د. هدى حاتم أخصائية تغذية وعلاج سمنة، وصاحبة تقنيات إيليت.</span></p>
+        <p><span class="en">She built them after seeing the same story repeat in her clinic: people who had tried every diet and still felt they were failing. Her answer was to stop fighting hunger and start treating appetite, under medical supervision, one case at a time.</span><span class="ar">بنت تقنياتها بعد ما شافت نفس القصة بتتكرر في عيادتها: ناس جربت كل أنواع الرجيم وبرضه حاسة إنها فاشلة. فكان الحل إنها توقف الحرب مع الجوع وتبدأ تعالج الشهية نفسها، تحت إشراف طبي، وكل حالة لوحدها.</span></p>
+        <ol class="c1-principles">
+          <li><b><span class="en">Appetite before restriction</span><span class="ar">الشهية قبل الحرمان</span></b><span><span class="en">Calm the urge to eat, and eating less follows.</span><span class="ar">لما الشهية تهدى، الأكل بيقل لوحده.</span></span></li>
+          <li><b><span class="en">Medicine before marketing</span><span class="ar">الطب قبل التسويق</span></b><span><span class="en">Every technique starts with a consultation, never a package.</span><span class="ar">كل تقنية بتبدأ باستشارة، مش بباكدج جاهزة.</span></span></li>
+          <li><b><span class="en">A case, not a program</span><span class="ar">حالة، مش برنامج</span></b><span><span class="en">Your age, health and history shape the plan.</span><span class="ar">سنك وصحتك وتاريخك الطبي هما اللي بيحددوا الخطة.</span></span></li>
+        </ol>
+        <div class="c1-about__sign"><img src="assets/logo-mark.png" alt=""><div><b><span class="en">Dr. Hoda Hatem</span><span class="ar">د. هدى حاتم</span></b><small><span class="en">Nutrition specialist, founder of the Elite techniques</span><span class="ar">أخصائية تغذية، ومؤسسة تقنيات إيليت</span></small></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY -->
+  <section class="c1-philo">
+    <div class="wrap">
+      <blockquote data-words>
+        <span class="en">Losing weight should not mean living in a fight with food. My work starts with appetite, so change feels natural instead of forced.</span>
+        <span class="ar">خسارة الوزن مش لازم تكون حرب مع الأكل. شغلي بيبدأ من الشهية، علشان التغيير يحصل بهدوء ومن غير ما تحسّ إنك بتعاقب نفسك.</span>
+      </blockquote>
+      <cite><span class="en">Dr. Hoda Hatem</span><span class="ar">د. هدى حاتم</span></cite>
+    </div>
+  </section>
+
+  <!-- THE DIFFERENCE -->
+  <section class="c1-diff c1-sec">
+    <div class="wrap">
+      <h2 class="c1-h2" data-fade><span class="en">Not another diet. A different starting point.</span><span class="ar">مش رجيم جديد. نقطة بداية مختلفة.</span></h2>
+      <div class="c1-diff__grid">
+        <div class="c1-diff__col c1-diff__col--old">
+          <h3><span class="en">The usual way</span><span class="ar">الطريقة المعتادة</span></h3>
+          <ul>
+            <li><i class="ph-light ph-x"></i><span class="t"><span class="en">Counting every calorie</span><span class="ar">حساب كل سعر حراري</span></span></li>
+            <li><i class="ph-light ph-x"></i><span class="t"><span class="en">Fighting hunger all day</span><span class="ar">مقاومة الجوع طول اليوم</span></span></li>
+            <li><i class="ph-light ph-x"></i><span class="t"><span class="en">Long lists of forbidden food</span><span class="ar">قوائم طويلة من الممنوعات</span></span></li>
+            <li><i class="ph-light ph-x"></i><span class="t"><span class="en">Hours at the gym</span><span class="ar">ساعات في الجيم</span></span></li>
+            <li><i class="ph-light ph-x"></i><span class="t"><span class="en">Starting over every Monday</span><span class="ar">تبدأ من جديد كل سبت</span></span></li>
+          </ul>
+        </div>
+        <div class="c1-diff__col c1-diff__col--new">
+          <h3><span class="en">The Elite way</span><span class="ar">طريقة إيليت</span></h3>
+          <ul>
+            <li><i class="ph-light ph-check"></i><span><span class="en">Appetite is calmed first</span><span class="ar">الشهية بتهدى الأول</span></span></li>
+            <li><i class="ph-light ph-check"></i><span><span class="en">Less hunger, naturally</span><span class="ar">جوع أقل بشكل طبيعي</span></span></li>
+            <li><i class="ph-light ph-check"></i><span><span class="en">Normal food, smaller portions</span><span class="ar">أكلك العادي بكميات أقل</span></span></li>
+            <li><i class="ph-light ph-check"></i><span><span class="en">No gym requirement</span><span class="ar">من غير جيم</span></span></li>
+            <li><i class="ph-light ph-check"></i><span><span class="en">Steady follow-up with Dr. Hoda</span><span class="ar">متابعة ثابتة مع د. هدى</span></span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ELITE SHOT -->
+  <section class="c1-shot" id="c1-shot">
+    <div class="wrap">
+      <div>
+        <span class="c1-shot__label"><span class="en">The signature technique</span><span class="ar">التقنية الأساسية</span></span>
+        <h2><span class="ln"><span>Elite</span></span><span class="ln"><span><em>Shot</em></span></span></h2>
+        <p class="c1-shot__lead" data-fade>
+          <span class="en">It calms appetite, so eating less stops feeling like a daily battle.</span>
+          <span class="ar">تهدّي الشهية، فيصبح تقليل الأكل شيئًا طبيعيًا، مش معركة يومية.</span>
+        </p>
+      </div>
+      <figure class="c1-shot__figure" data-parallax><img src="pics/website3.png" alt="" aria-hidden="true"></figure>
+      <ul class="c1-shot__nots" data-stagger>
+        <li><strong><span class="en">No diet plan</span><span class="ar">بدون جدول رجيم</span></strong><span class="en">No calorie counting or forbidden food lists.</span><span class="ar">لا حساب سعرات ولا قائمة ممنوعات.</span></li>
+        <li><strong><span class="en">No gym routine</span><span class="ar">بدون جيم</span></strong><span class="en">Results do not depend on intense exercise.</span><span class="ar">النتيجة لا تعتمد على تمارين مرهقة.</span></li>
+        <li><strong><span class="en">No surgery</span><span class="ar">بدون جراحة</span></strong><span class="en">Non-surgical and supervised by Dr. Hoda.</span><span class="ar">غير جراحية وتحت إشراف د. هدى.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ELITE FAMILY INDEX -->
+  <section class="c1-index" id="c1-index">
+    <div class="wrap">
+      <h2 data-fade><span class="en">One philosophy, shaped for different bodies.</span><span class="ar">فلسفة واحدة، مصمّمة لاحتياجات مختلفة.</span></h2>
+      <div class="c1-index__list">
+        <div class="c1-row">
+          <button class="c1-row__head" aria-expanded="false"><span class="c1-row__name">Elite Plus</span><span class="c1-row__tag"><span class="en">Advanced</span><span class="ar">المستوى المتقدم</span></span><i class="ph-light ph-plus c1-row__icon"></i></button>
+          <div class="c1-row__body"><div class="c1-row__inner">
+            <p><span class="en">Elite Shot, taken further. A stronger protocol for people who need a more advanced approach to appetite and weight.</span><span class="ar">خطوة أبعد من إيليت شوت. بروتوكول أقوى لمن يحتاج نهجًا متقدمًا في التحكم بالشهية والوزن.</span></p>
+            <ul><li><span class="en">Built on the Elite Shot principle</span><span class="ar">مبنية على فكرة إيليت شوت</span></li><li><span class="en">Higher-intensity protocol</span><span class="ar">بروتوكول بكثافة أعلى</span></li><li><span class="en">Closely followed by Dr. Hoda</span><span class="ar">متابعة دقيقة من د. هدى</span></li></ul>
+          </div></div>
+        </div>
+        <div class="c1-row">
+          <button class="c1-row__head" aria-expanded="false"><span class="c1-row__name">Elite Less</span><span class="c1-row__tag"><span class="en">Carefully calibrated</span><span class="ar">بحذر وعناية</span></span><i class="ph-light ph-plus c1-row__icon"></i></button>
+          <div class="c1-row__body"><div class="c1-row__inner">
+            <p><span class="en">Designed for older patients and people with certain medical conditions, including heart-related ones. Every step is planned around your medical history.</span><span class="ar">مصممة لكبار السن ولأصحاب بعض الحالات الطبية، ومنها أمراض القلب. كل خطوة تُبنى على تاريخك الطبي.</span></p>
+            <ul><li><span class="en">For older patients</span><span class="ar">مناسبة لكبار السن</span></li><li><span class="en">Considers heart and chronic conditions</span><span class="ar">تراعي أمراض القلب والأمراض المزمنة</span></li><li><span class="en">Gentle pace, close monitoring</span><span class="ar">إيقاع هادئ ومتابعة قريبة</span></li></ul>
+          </div></div>
+        </div>
+        <div class="c1-row">
+          <button class="c1-row__head" aria-expanded="false"><span class="c1-row__name">Elite Fit</span><span class="c1-row__tag"><span class="en">Lose and shape</span><span class="ar">وزن ونحت</span></span><i class="ph-light ph-plus c1-row__icon"></i></button>
+          <div class="c1-row__body"><div class="c1-row__inner">
+            <p><span class="en">Weight loss and body contouring together. For people who want the scale and the silhouette to change, without surgery.</span><span class="ar">إنقاص الوزن ونحت الجسم معًا. لمن يريد أن يتغير الميزان وشكل الجسم أيضًا، بدون جراحة.</span></p>
+            <ul><li><span class="en">Weight loss + body shaping</span><span class="ar">نزول وزن + نحت</span></li><li><span class="en">Non-surgical contouring</span><span class="ar">نحت بدون جراحة</span></li><li><span class="en">Targets problem areas</span><span class="ar">تستهدف المناطق العنيدة</span></li></ul>
+          </div></div>
+        </div>
+        <div class="c1-row">
+          <button class="c1-row__head" aria-expanded="false"><span class="c1-row__name">Elite TIDE</span><span class="c1-row__tag"><span class="en">Peptide-based</span><span class="ar">قائمة على الببتيدات</span></span><i class="ph-light ph-plus c1-row__icon"></i></button>
+          <div class="c1-row__body"><div class="c1-row__inner">
+            <p><span class="en">Built on the same principle as injectable weight-management treatments, with an added peptide-based layer.</span><span class="ar">تقوم على نفس فكرة علاجات إنقاص الوزن بالحقن، مع طبقة إضافية قائمة على الببتيدات.</span></p>
+            <ul><li><span class="en">Injectable-class concept</span><span class="ar">نفس مبدأ الحقن</span></li><li><span class="en">Peptide-based support</span><span class="ar">دعم بالببتيدات</span></li><li><span class="en">Part of the Elite family</span><span class="ar">جزء من عائلة إيليت</span></li></ul>
+          </div></div>
+        </div>
+      </div>
+      <p class="c1-note"><span class="en">Every technique begins with a medical consultation. Dr. Hoda decides what suits you. Individual results vary.</span><span class="ar">كل تقنية تبدأ باستشارة طبية، ود. هدى هي من تحدد الأنسب لحالتك. النتائج تختلف من شخص لآخر.</span></p>
+      <div class="c1-compare" id="c1-compare">
+        <h2 class="c1-h2" data-fade><span class="en">The five techniques, side by side.</span><span class="ar">التقنيات الخمسة، جنب بعض.</span></h2>
+        <div class="c1-compare__scroll" data-fade>
+          <table>
+            <thead><tr><th scope="col"><span class="en">Technique</span><span class="ar">التقنية</span></th><th scope="col"><span class="en">Best suited for</span><span class="ar">مناسبة لـ</span></th><th scope="col"><span class="en">Goal</span><span class="ar">الهدف</span></th><th scope="col"><span class="en">Intensity</span><span class="ar">القوة</span></th><th scope="col"><span class="en">Body contouring</span><span class="ar">نحت الجسم</span></th><th scope="col"><span class="en">Chronic conditions</span><span class="ar">الأمراض المزمنة</span></th></tr></thead>
+            <tbody>
+              <tr class="is-core"><th scope="row">Elite Shot<span class="core"><span class="en">Core</span><span class="ar">الأساس</span></span><small><span class="en">The signature technique</span><span class="ar">التقنية الأساسية</span></small></th><td><span class="en">Most people starting out</span><span class="ar">أغلب الحالات في البداية</span></td><td><span class="en">Weight loss</span><span class="ar">خسارة وزن</span></td><td><span class="c1-lvl" aria-label="2 of 3"><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="c1-no"><span class="en">No</span><span class="ar">لا</span></span></td><td><span class="en">After assessment</span><span class="ar">حسب التقييم</span></td></tr>
+              <tr><th scope="row">Elite Plus<small><span class="en">Advanced</span><span class="ar">المستوى المتقدم</span></small></th><td><span class="en">Higher weights, or a stronger push</span><span class="ar">الأوزان الأعلى، أو اللي محتاج دفعة أقوى</span></td><td><span class="en">A stronger approach</span><span class="ar">نهج أقوى</span></td><td><span class="c1-lvl" aria-label="3 of 3"><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="c1-no"><span class="en">No</span><span class="ar">لا</span></span></td><td><span class="en">After assessment</span><span class="ar">حسب التقييم</span></td></tr>
+              <tr><th scope="row">Elite Less<small><span class="en">Carefully calibrated</span><span class="ar">بحذر وعناية</span></small></th><td><span class="en">Older patients; heart, blood pressure, diabetes</span><span class="ar">كبار السن، ومرضى القلب والضغط والسكر</span></td><td><span class="en">Safe weight loss</span><span class="ar">خسارة وزن بأمان</span></td><td><span class="c1-lvl" aria-label="1 of 3"><i class="on"></i><i></i><i></i></span></td><td><span class="c1-no"><span class="en">No</span><span class="ar">لا</span></span></td><td><span class="c1-yes"><i class="ph-light ph-check"></i><span class="en">Yes</span><span class="ar">نعم</span></span></td></tr>
+              <tr><th scope="row">Elite Fit<small><span class="en">Lose and shape</span><span class="ar">وزن ونحت</span></small></th><td><span class="en">Losing weight and shaping together</span><span class="ar">خسارة الوزن مع نحت الجسم</span></td><td><span class="en">Weight loss + contouring</span><span class="ar">خسارة + نحت</span></td><td><span class="c1-lvl" aria-label="2 of 3"><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="c1-yes"><i class="ph-light ph-check"></i><span class="en">Yes</span><span class="ar">نعم</span></span></td><td><span class="en">After assessment</span><span class="ar">حسب التقييم</span></td></tr>
+              <tr><th scope="row">Elite TIDE<small><span class="en">Peptide-based</span><span class="ar">قائمة على الببتيدات</span></small></th><td><span class="en">People who tried weight-loss treatments before</span><span class="ar">اللي جرّب علاجات تخسيس قبل كده</span></td><td><span class="en">Enhanced weight loss</span><span class="ar">خسارة وزن مُعزَّزة</span></td><td><span class="c1-lvl" aria-label="3 of 3"><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="c1-no"><span class="en">No</span><span class="ar">لا</span></span></td><td><span class="en">After assessment</span><span class="ar">حسب التقييم</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="c1-compare__foot">
+          <p><span class="en">A guide, not a prescription. The right technique is decided after your medical assessment, and individual results vary.</span><span class="ar">ده دليل مش وصفة علاجية. التقنية المناسبة بتتحدد بعد الكشف والتقييم الطبي، والنتائج بتختلف من شخص لآخر.</span></p>
+          <a class="link" href="#c1-quiz"><span class="en">Not sure? Take the one-minute quiz</span><span class="ar">مش متأكد؟ جرّب الاختبار في دقيقة</span><i class="ph-light ph-arrow-right flip"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ: which Elite suits me? -->
+  <section class="c1-quiz c1-sec" id="c1-quiz">
+    <img class="c1-quiz__mark" src="assets/logo-mark-sand.png" alt="" aria-hidden="true">
+    <div class="wrap c1-quiz__grid">
+      <div class="c1-quiz__intro">
+        <h2 class="c1-h2" data-fade><span class="en">Which Elite suits you?</span><span class="ar">أنهي إيليت تناسبك؟</span></h2>
+        <p data-fade><span class="en">Five quick questions for a first suggestion. The final decision is always made with Dr. Hoda, in your consultation.</span><span class="ar">خمس أسئلة سريعة لاقتراح مبدئي. والقرار النهائي دايمًا مع د. هدى في الكشف.</span></p>
+        <div class="c1-quiz__bars" data-quiz-bars aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="c1-quiz__panel" data-quiz aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ELITE PROCESS -->
+  <section class="c1-process c1-sec" id="c1-process">
+    <div class="wrap c1-process__grid">
+      <div class="c1-process__aside">
+        <h2 class="c1-h2"><span class="en">The Elite process.</span><span class="ar">رحلة إيليت.</span></h2>
+        <p><span class="en">Five stages, with the same doctor from the first conversation to the last check-in.</span><span class="ar">خمس مراحل، مع نفس الطبيبة من أول حوار لآخر متابعة.</span></p>
+        <figure class="c1-process__fig" aria-hidden="true">
+          <img class="is-on" src="pics/website3.png" alt="" style="object-position:50% 15%">
+          <img src="pics/website-2.jpg" alt="" style="object-position:50% 12%">
+          <img src="pics/website.png" alt="" style="object-position:50% 15%">
+          <img src="pics/website3.png" alt="" style="object-position:50% 15%">
+          <img src="pics/website-2.jpg" alt="" style="object-position:50% 12%">
+        </figure>
+        <div class="c1-process__bar"><span></span></div>
+      </div>
+      <div>
+        <ol class="c1-process__steps">
+          <li class="c1-pstep" data-step-i="0"><span class="c1-pstep__n"><span class="en">01</span><span class="ar">٠١</span></span><h3><span class="en">Consultation</span><span class="ar">الاستشارة</span></h3><p><span class="en">A private conversation with Dr. Hoda about your history, habits and goals. No pressure and no package to sell.</span><span class="ar">حوار خاص مع د. هدى عن تاريخك الصحي وعاداتك وهدفك. من غير ضغط ومن غير باكدج مفروضة.</span></p><ul><li><i class="ph-light ph-check"></i><span><span class="en">In person, at your chosen clinic</span><span class="ar">حضوريًا في العيادة اللي تختارها</span></span></li><li><i class="ph-light ph-check"></i><span><span class="en">Bring any recent tests you have</span><span class="ar">هات معاك أي تحاليل حديثة</span></span></li></ul></li>
+          <li class="c1-pstep" data-step-i="1"><span class="c1-pstep__n"><span class="en">02</span><span class="ar">٠٢</span></span><h3><span class="en">Medical assessment</span><span class="ar">التقييم الطبي</span></h3><p><span class="en">Your health, age and any medical conditions are reviewed carefully, so the plan is safe for you before it is effective.</span><span class="ar">بتتم مراجعة حالتك الصحية وسنك وأي أمراض بعناية، علشان الخطة تكون آمنة قبل ما تكون فعالة.</span></p><ul><li><i class="ph-light ph-check"></i><span><span class="en">Medical history review</span><span class="ar">مراجعة التاريخ الطبي</span></span></li><li><i class="ph-light ph-check"></i><span><span class="en">Conditions such as heart disease considered</span><span class="ar">مراعاة حالات زي أمراض القلب</span></span></li></ul></li>
+          <li class="c1-pstep" data-step-i="2"><span class="c1-pstep__n"><span class="en">03</span><span class="ar">٠٣</span></span><h3><span class="en">Your Elite technique</span><span class="ar">تقنيتك من إيليت</span></h3><p><span class="en">Dr. Hoda chooses the technique for your case, from Elite Shot to Elite TIDE, and explains exactly what to expect.</span><span class="ar">د. هدى بتختار التقنية المناسبة لحالتك، من إيليت شوت لإيليت تايد، وبتشرحلك بالظبط هتتوقع إيه.</span></p><ul><li><i class="ph-light ph-check"></i><span><span class="en">Shot, Plus, Less, Fit or TIDE</span><span class="ar">شوت، بلس، لِس، فيت، أو تايد</span></span></li><li><i class="ph-light ph-check"></i><span><span class="en">A clear explanation before you begin</span><span class="ar">شرح واضح قبل ما تبدأ</span></span></li></ul></li>
+          <li class="c1-pstep" data-step-i="3"><span class="c1-pstep__n"><span class="en">04</span><span class="ar">٠٤</span></span><h3><span class="en">Follow-up</span><span class="ar">المتابعة</span></h3><p><span class="en">Regular check-ins to see how your appetite and weight respond, and to adjust the plan when needed.</span><span class="ar">متابعة منتظمة لنشوف شهيتك ووزنك بيستجيبوا إزاي، ونعدّل الخطة لو احتاجنا.</span></p><ul><li><i class="ph-light ph-check"></i><span><span class="en">Progress reviewed with Dr. Hoda</span><span class="ar">مراجعة التقدم مع د. هدى</span></span></li><li><i class="ph-light ph-check"></i><span><span class="en">Plan adjusted to your response</span><span class="ar">تعديل الخطة حسب استجابتك</span></span></li></ul></li>
+          <li class="c1-pstep" data-step-i="4"><span class="c1-pstep__n"><span class="en">05</span><span class="ar">٠٥</span></span><h3><span class="en">Keeping the result</span><span class="ar">الحفاظ على النتيجة</span></h3><p><span class="en">Guidance to keep your results, built around normal life rather than restriction.</span><span class="ar">توجيهات تساعدك تحافظ على نتيجتك، مبنية على حياتك الطبيعية مش على الحرمان.</span></p><ul><li><i class="ph-light ph-check"></i><span><span class="en">Habits that fit your routine</span><span class="ar">عادات تناسب يومك</span></span></li><li><i class="ph-light ph-check"></i><span><span class="en">Support when you need it</span><span class="ar">دعم وقت ما تحتاجه</span></span></li></ul></li>
+        </ol>
+        <div class="c1-process__cta"><button class="btn" data-book><span class="en">Book an Appointment</span><span class="ar">احجز موعدك</span><i class="ph-light ph-arrow-right flip"></i></button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS (photo slots + sample reviews: replace with real, consented material) -->
+  <section class="c1-results c1-sec" id="c1-results">
+    <div class="wrap">
+      <h2 class="c1-h2" data-fade><span class="en">Results, with consent.</span><span class="ar">نتائج حقيقية، بموافقة أصحابها.</span></h2>
+      <div class="c1-results__grid">
+        <figure>
+          <div class="c1-ba" data-ba>
+            <div class="c1-ba__img c1-ba__before"><i class="ph-light ph-image"></i><b><span class="en">Before photo</span><span class="ar">صورة قبل</span></b><small><span class="en">Added with the patient's consent</span><span class="ar">تُضاف بموافقة المريض</span></small></div>
+            <div class="c1-ba__img c1-ba__after"><i class="ph-light ph-image"></i><b><span class="en">After photo</span><span class="ar">صورة بعد</span></b><small><span class="en">Added with the patient's consent</span><span class="ar">تُضاف بموافقة المريض</span></small></div>
+            <span class="c1-ba__tag">Elite Shot</span>
+            <input type="range" min="5" max="95" value="50" dir="ltr" aria-label="Compare before and after">
+            <span class="c1-ba__line"></span>
+            <span class="c1-ba__handle"><i class="ph-light ph-arrows-left-right"></i></span>
+          </div>
+          <figcaption><span class="en">Published with the patient's consent. Individual results vary.</span><span class="ar">الصور منشورة بموافقة المريض. النتائج بتختلف من شخص لآخر.</span></figcaption>
+        </figure>
+        <div class="c1-reviews" data-stagger>
+          <blockquote><p><span class="en">“For the first time I am losing weight without feeling deprived. Food is not on my mind all day anymore.”</span><span class="ar">«أول مرة أخس وأنا مش حاسة إني محرومة. الأكل بقى مش شاغلني زي الأول.»</span></p><footer><b><span class="en">Mona, Tanta</span><span class="ar">منى، طنطا</span></b><span>Elite Shot</span></footer></blockquote>
+          <blockquote><p><span class="en">“I was worried because of my blood pressure, but Dr. Hoda followed me step by step and I felt safe.”</span><span class="ar">«كنت خايفة علشان الضغط، بس د. هدى تابعتني خطوة بخطوة وكنت مطمنة.»</span></p><footer><b><span class="en">Souad, Zagazig</span><span class="ar">أ. سعاد، الزقازيق</span></b><span>Elite Less</span></footer></blockquote>
+          <blockquote><p><span class="en">“I lost weight and my shape changed at the same time. The follow-up was excellent.”</span><span class="ar">«خسيت وجسمي اتحدد في نفس الوقت، والمتابعة كانت ممتازة.»</span></p><footer><b><span class="en">Yasmine, Cairo</span><span class="ar">ياسمين، القاهرة</span></b><span>Elite Fit</span></footer></blockquote>
+          <a class="link" href="#"><span class="en">See all results and videos</span><span class="ar">شوف كل النتائج والفيديوهات</span><i class="ph-light ph-arrow-right flip"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLINICS -->
+  <section class="c1-clinics" id="c1-clinics">
+    <div class="wrap">
+      <h2 data-fade><span class="en">Three clinics. One doctor.</span><span class="ar">ثلاث عيادات. طبيبة واحدة.</span></h2>
+      <div class="c1-clinics__grid" data-stagger>
+        <article class="c1-clinic">
+          <h3><span class="en">Tanta</span><span class="ar">طنطا</span></h3>
+          <p><span class="en">Consultations and follow-up in the heart of the Delta.</span><span class="ar">استشارات ومتابعة في قلب الدلتا.</span></p>
+          <dl class="c1-clinic__meta"><div><dt><span class="en">Days</span><span class="ar">الأيام</span></dt><dd><span class="en">Sunday, Monday, Wednesday</span><span class="ar">الأحد والاثنين والأربعاء</span></dd></div><div><dt><span class="en">Appointments</span><span class="ar">المواعيد</span></dt><dd><span class="en">From 2:00 PM</span><span class="ar">من ٢ الظهر</span></dd></div></dl>
+          <div class="c1-clinic__actions"><button class="link" data-book data-clinic="tanta"><span class="en">Choose this clinic</span><span class="ar">اختر هذه العيادة</span><i class="ph-light ph-arrow-right flip"></i></button><a class="link" href="https://www.google.com/maps/search/?api=1&amp;query=Tanta%2C%20Egypt" target="_blank" rel="noopener"><span class="en">Directions</span><span class="ar">الاتجاهات</span></a></div>
+        </article>
+        <article class="c1-clinic">
+          <h3><span class="en">Zagazig</span><span class="ar">الزقازيق</span></h3>
+          <p><span class="en">The full Elite family, close to home in Sharqia.</span><span class="ar">كل تقنيات إيليت، قريبة منك في الشرقية.</span></p>
+          <dl class="c1-clinic__meta"><div><dt><span class="en">Days</span><span class="ar">الأيام</span></dt><dd><span class="en">Tuesday</span><span class="ar">الثلاثاء</span></dd></div><div><dt><span class="en">Appointments</span><span class="ar">المواعيد</span></dt><dd><span class="en">From 2:00 PM</span><span class="ar">من ٢ الظهر</span></dd></div></dl>
+          <div class="c1-clinic__actions"><button class="link" data-book data-clinic="zagazig"><span class="en">Choose this clinic</span><span class="ar">اختر هذه العيادة</span><i class="ph-light ph-arrow-right flip"></i></button><a class="link" href="https://www.google.com/maps/search/?api=1&amp;query=Zagazig%2C%20Egypt" target="_blank" rel="noopener"><span class="en">Directions</span><span class="ar">الاتجاهات</span></a></div>
+        </article>
+        <article class="c1-clinic">
+          <h3><span class="en">Cairo</span><span class="ar">القاهرة</span></h3>
+          <p><span class="en">Inside CMS Mall, for patients across Greater Cairo.</span><span class="ar">داخل سي إم إس مول، لمرضى القاهرة الكبرى.</span></p>
+          <dl class="c1-clinic__meta"><div><dt><span class="en">Days</span><span class="ar">الأيام</span></dt><dd><span class="en">Saturday</span><span class="ar">السبت</span></dd></div><div><dt><span class="en">Appointments</span><span class="ar">المواعيد</span></dt><dd><span class="en">From 12:00 PM</span><span class="ar">من ١٢ الظهر</span></dd></div></dl>
+          <div class="c1-clinic__actions"><button class="link" data-book data-clinic="cairo"><span class="en">Choose this clinic</span><span class="ar">اختر هذه العيادة</span><i class="ph-light ph-arrow-right flip"></i></button><a class="link" href="https://www.google.com/maps/search/?api=1&amp;query=CMS%20Mall%2C%20Cairo" target="_blank" rel="noopener"><span class="en">Directions</span><span class="ar">الاتجاهات</span></a></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOURNAL (sample articles for the exploration) -->
+  <section class="c1-journal c1-sec" id="c1-journal">
+    <div class="wrap">
+      <div class="c1-journal__head">
+        <h2 class="c1-h2" data-fade><span class="en">The journal.</span><span class="ar">مقالات د. هدى.</span></h2>
+        <div class="c1-tabs" role="group" aria-label="Filter articles">
+          <button data-filter="all" aria-pressed="true"><span class="en">All</span><span class="ar">الكل</span></button>
+          <button data-filter="appetite" aria-pressed="false"><span class="en">Appetite</span><span class="ar">الشهية</span></button>
+          <button data-filter="techniques" aria-pressed="false"><span class="en">Elite techniques</span><span class="ar">تقنيات إيليت</span></button>
+          <button data-filter="life" aria-pressed="false"><span class="en">Everyday life</span><span class="ar">الحياة اليومية</span></button>
+        </div>
+      </div>
+      <div class="c1-journal__grid">
+        <article class="c1-feature" data-cat="appetite">
+          <a href="#">
+            <figure class="c1-feature__img"><img src="pics/website3.png" alt=""></figure>
+            <span class="c1-meta"><span class="en">Appetite · 6 min read</span><span class="ar">الشهية · ٦ دقائق قراءة</span></span>
+            <h3><span class="en">Why diets fail at the same point, every time</span><span class="ar">ليه الرجيم بيفشل في نفس النقطة كل مرة؟</span></h3>
+            <p><span class="en">Most diets do not fail because of willpower. They fail when appetite wins. Dr. Hoda explains what happens, and what changes when you start there instead.</span><span class="ar">أغلب أنواع الرجيم مش بتفشل بسبب قوة الإرادة، بتفشل لما الشهية تكسب. د. هدى بتشرح إيه اللي بيحصل، وإيه اللي بيتغير لما نبدأ من الشهية.</span></p>
+            <span class="link"><span class="en">Read the article</span><span class="ar">اقرأ المقال</span></span>
+          </a>
+        </article>
+        <div>
+          <ul class="c1-posts">
+            <li class="c1-post" data-cat="appetite"><a href="#"><span><span class="c1-meta"><span class="en">Appetite · 4 min read</span><span class="ar">الشهية · ٤ دقائق قراءة</span></span><h3><span class="en">Hunger and appetite are not the same thing</span><span class="ar">الجوع والشهية مش نفس الحاجة</span></h3></span><i class="ph-light ph-arrow-right"></i></a></li>
+            <li class="c1-post" data-cat="techniques"><a href="#"><span><span class="c1-meta"><span class="en">Elite techniques · 5 min read</span><span class="ar">تقنيات إيليت · ٥ دقائق قراءة</span></span><h3><span class="en">Elite Shot, explained in plain words</span><span class="ar">إيليت شوت ببساطة ومن غير مصطلحات</span></h3></span><i class="ph-light ph-arrow-right"></i></a></li>
+            <li class="c1-post" data-cat="techniques"><a href="#"><span><span class="c1-meta"><span class="en">Elite techniques · 7 min read</span><span class="ar">تقنيات إيليت · ٧ دقائق قراءة</span></span><h3><span class="en">Losing weight after 50: what changes</span><span class="ar">خسارة الوزن بعد الخمسين: إيه اللي بيتغير؟</span></h3></span><i class="ph-light ph-arrow-right"></i></a></li>
+            <li class="c1-post" data-cat="life"><a href="#"><span><span class="c1-meta"><span class="en">Everyday life · 3 min read</span><span class="ar">الحياة اليومية · ٣ دقائق قراءة</span></span><h3><span class="en">Eating out without guilt</span><span class="ar">الأكل برا من غير إحساس بالذنب</span></h3></span><i class="ph-light ph-arrow-right"></i></a></li>
+          </ul>
+          <p class="c1-journal__empty" data-journal-empty><span class="en">No articles in this category yet.</span><span class="ar">لا توجد مقالات في هذا القسم بعد.</span></p>
+          <a class="link c1-journal__all" href="#"><span class="en">View all articles</span><span class="ar">كل المقالات</span><i class="ph-light ph-arrow-right flip"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="c1-faq" id="c1-faq">
+    <div class="wrap">
+      <h2 data-fade><span class="en">Before your first visit</span><span class="ar">قبل زيارتك الأولى</span></h2>
+      <div>
+        <details><summary><span><span class="en">Do I need to follow a diet?</span><span class="ar">هل لازم أمشي على رجيم؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">No strict diet plan. Elite techniques work on appetite, so eating less becomes natural. Dr. Hoda gives simple, livable guidance instead of rules.</span><span class="ar">لا يوجد جدول رجيم صارم. تقنيات إيليت تعمل على الشهية، فيقل الأكل بشكل طبيعي. ود. هدى بتديك توجيهات بسيطة تقدر تعيش بيها، مش قواعد.</span></p></details>
+        <details><summary><span><span class="en">Is any of it surgical?</span><span class="ar">هل فيه أي جراحة؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">No. Every technique in the Elite family is non-surgical.</span><span class="ar">لا. كل تقنيات عائلة إيليت غير جراحية.</span></p></details>
+        <details><summary><span><span class="en">How do I know which technique fits me?</span><span class="ar">إزاي أعرف التقنية المناسبة ليا؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">That is decided in your consultation, based on your health, age, history and goals.</span><span class="ar">ده بيتحدد في الاستشارة، حسب حالتك الصحية وسنك وتاريخك الطبي وهدفك.</span></p></details>
+        <details><summary><span><span class="en">I am older, or have a heart condition. Can I start?</span><span class="ar">سني كبير أو عندي مشكلة في القلب، أقدر أبدأ؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">Elite Less was designed for exactly this. Your medical history is reviewed carefully before anything begins.</span><span class="ar">إيليت لِس اتصممت مخصوص لده. بيتم مراجعة تاريخك الطبي بعناية قبل أي خطوة.</span></p></details>
+        <details><summary><span><span class="en">What exactly is Elite Shot?</span><span class="ar">يعني إيه إيليت شوت؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">Elite Shot is Dr. Hoda's signature technique. It works by controlling appetite, so you lose weight without a strict diet, without the gym and without surgery.</span><span class="ar">إيليت شوت هي التقنية الأساسية من د. هدى. بتشتغل على التحكم في الشهية، فتخس من غير دايت قاسي ومن غير جيم ومن غير جراحة.</span></p></details>
+        <details><summary><span><span class="en">How much weight will I lose per month?</span><span class="ar">هخس كام كيلو في الشهر؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">It differs from person to person, depending on weight, age, health and follow-up. Dr. Hoda explains realistic expectations in your first visit.</span><span class="ar">ده بيختلف من شخص لآخر حسب الوزن والسن والحالة الصحية والالتزام بالمتابعة. د. هدى بتوضحلك التوقعات الواقعية في أول كشف.</span></p></details>
+        <details><summary><span><span class="en">How do I book, and when is each clinic open?</span><span class="ar">أحجز إزاي، والعيادات بتشتغل إمتى؟</span></span><i class="ph-light ph-plus"></i></summary><p><span class="en">Book online here or on WhatsApp. Cairo (CMS Mall) on Saturday, Tanta on Sunday, Monday and Wednesday, and Zagazig on Tuesday.</span><span class="ar">تقدر تحجز أونلاين من هنا أو على واتساب. القاهرة (سي إم إس مول) يوم السبت، طنطا الأحد والاثنين والأربعاء، والزقازيق يوم الثلاثاء.</span></p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING + FOOTER -->
+  <section class="c1-close">
+    <div class="wrap">
+      <figure class="c1-sig" data-sig>
+        <div class="c1-sig__face face-crop" style="--z:3"><img class="melt" src="pics/website.png" alt="Dr. Hoda Hatem"></div>
+        <blockquote class="c1-sig__quote"><span class="en">“Come as you are. We start with a conversation, not a diet.”</span><span class="ar">«تعالى زي ما انت. هنبدأ بحوار، مش برجيم.»</span></blockquote>
+        <figcaption class="c1-sig__name"><b><span class="en">Dr. Hoda Hatem</span><span class="ar">د. هدى حاتم</span></b><span><span class="en">Founder of the Elite techniques</span><span class="ar">مؤسسة تقنيات إيليت</span></span></figcaption>
+        <div class="c1-sig__cta">
+          <button class="btn" data-book><span class="en">Book an Appointment</span><span class="ar">احجز موعدك</span><i class="ph-light ph-arrow-right flip"></i></button>
+          <a class="link" data-wa href="#" target="_blank" rel="noopener"><svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span class="en">Ask us on WhatsApp</span><span class="ar">اسألنا على واتساب</span></a>
+        </div>
+      </figure>
+      <footer class="c1-foot">
+        <div class="c1-foot__top">
+          <div class="c1-foot__brand"><img src="assets/logo-sand.png" alt="Dr. Hoda Hatem"><p><span class="en">Nutrition and weight-management specialist. Creator of the non-surgical Elite techniques.</span><span class="ar">أخصائية تغذية وعلاج سمنة، وصاحبة تقنيات إيليت غير الجراحية.</span></p><div class="c1-foot__contact"><a data-wa href="#" target="_blank" rel="noopener"><svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span class="en">WhatsApp</span><span class="ar">واتساب</span></a><a data-tel href="#"><i class="ph-light ph-phone"></i><span class="en">Call the clinic</span><span class="ar">اتصل بالعيادة</span></a></div></div>
+          <div><h4><span class="en">Elite techniques</span><span class="ar">تقنيات إيليت</span></h4><ul><li><a href="#c1-shot">Elite Shot</a></li><li><a href="#c1-index">Elite Plus</a></li><li><a href="#c1-index">Elite Less</a></li><li><a href="#c1-index">Elite Fit</a></li><li><a href="#c1-index">Elite TIDE</a></li></ul></div>
+          <div><h4><span class="en">Clinics</span><span class="ar">العيادات</span></h4><ul><li><button data-book data-clinic="tanta"><span class="en">Tanta</span><span class="ar">طنطا</span><small><span class="en">Sun, Mon, Wed</span><span class="ar">الأحد والاثنين والأربعاء</span></small></button></li><li><button data-book data-clinic="zagazig"><span class="en">Zagazig</span><span class="ar">الزقازيق</span><small><span class="en">Tuesday</span><span class="ar">الثلاثاء</span></small></button></li><li><button data-book data-clinic="cairo"><span class="en">Cairo, CMS Mall</span><span class="ar">القاهرة، سي إم إس مول</span><small><span class="en">Saturday</span><span class="ar">السبت</span></small></button></li></ul></div>
+          <div><h4><span class="en">Explore</span><span class="ar">استكشف</span></h4><ul><li><a href="#c1-about"><span class="en">About Dr. Hoda</span><span class="ar">عن د. هدى</span></a></li><li><a href="#c1-quiz"><span class="en">Which Elite suits me?</span><span class="ar">أنهي إيليت تناسبني؟</span></a></li><li><a href="#c1-process"><span class="en">The process</span><span class="ar">الرحلة</span></a></li><li><a href="#c1-results"><span class="en">Results</span><span class="ar">النتائج</span></a></li><li><a href="#c1-journal"><span class="en">Journal</span><span class="ar">المقالات</span></a></li><li><a href="#c1-faq"><span class="en">Questions</span><span class="ar">أسئلة شائعة</span></a></li></ul></div>
+          <form class="c1-news" data-c1-news novalidate>
+            <h4><span class="en">Letters from Dr. Hoda</span><span class="ar">رسائل من د. هدى</span></h4>
+            <p><span class="en">Occasional notes on appetite and weight. No spam.</span><span class="ar">ملاحظات من وقت للتاني عن الشهية والوزن. من غير إزعاج.</span></p>
+            <div class="c1-news__row"><label><span class="sr-only">Email</span><input type="email" name="email" autocomplete="email" placeholder="name@email.com" dir="ltr"></label><button type="submit"><span class="en">Subscribe</span><span class="ar">اشترك</span><i class="ph-light ph-arrow-right flip"></i></button></div>
+            <span class="c1-news__msg" aria-live="polite"></span>
+          </form>
+        </div>
+        <div class="c1-foot__bottom">
+          <p><span class="en"><strong>Medical disclaimer.</strong> Information on this site is for awareness and does not replace a medical consultation. Elite techniques are used only after a medical assessment, and individual results vary.</span><span class="ar"><strong>إخلاء مسؤولية طبية.</strong> المعلومات في الموقع للتوعية فقط ولا تغني عن الاستشارة الطبية. تقنيات إيليت بتُستخدم بعد كشف وتقييم طبي، والنتائج بتختلف من شخص لآخر.</span></p>
+          <nav><a href="#">Instagram</a><a href="#">Facebook</a><a href="#">TikTok</a><a href="#">YouTube</a></nav>
+          <span><span class="en">© 2026 Dr. Hoda Hatem</span><span class="ar">© ٢٠٢٦ د. هدى حاتم</span> · <a href="#"><span class="en">Privacy</span><span class="ar">الخصوصية</span></a></span>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+  <a class="c1-wa" data-wa data-c1-wa href="#" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>
+
+  <!-- CONCIERGE BOOKING OVERLAY -->
+  <div class="c1-cc" data-c1-cc role="dialog" aria-modal="true" aria-label="Book an appointment">
+    <div class="c1-cc__aside duo"><img src="pics/website3.png" alt="" aria-hidden="true"><p><span class="en">A private consultation with Dr. Hoda Hatem.</span><span class="ar">استشارة خاصة مع د. هدى حاتم.</span></p></div>
+    <div class="c1-cc__main" data-booking="c1">
+      <div class="c1-cc__top"><div class="c1-cc__progress"><span data-progress></span></div><button class="c1-cc__close" data-c1-close aria-label="Close"><i class="ph-light ph-x"></i></button></div>
+
+      <div data-step="1" data-require="clinic">
+        <h3><span class="en">Which clinic suits you?</span><span class="ar">أي عيادة أقرب لك؟</span></h3>
+        <div data-group="clinic">
+          <button class="c1-opt" data-pick="clinic" data-value="tanta"><span><span class="en">Tanta</span><span class="ar">طنطا</span></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="clinic" data-value="zagazig"><span><span class="en">Zagazig</span><span class="ar">الزقازيق</span></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="clinic" data-value="cairo"><span><span class="en">Cairo</span><span class="ar">القاهرة</span><small><span class="en">CMS Mall</span><span class="ar">سي إم إس مول</span></small></span><i class="ph-light ph-check"></i></button>
+        </div>
+      </div>
+
+      <div data-step="2" data-require="technique">
+        <h3><span class="en">What would you like to discuss?</span><span class="ar">حابب تتكلم عن إيه؟</span></h3>
+        <div data-group="technique">
+          <button class="c1-opt" data-pick="technique" data-value="shot"><span>Elite Shot<small><span class="en">The signature technique</span><span class="ar">التقنية الأساسية</span></small></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="technique" data-value="plus"><span>Elite Plus<small><span class="en">Advanced</span><span class="ar">المستوى المتقدم</span></small></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="technique" data-value="less"><span>Elite Less<small><span class="en">For older patients and medical conditions</span><span class="ar">لكبار السن وبعض الحالات الطبية</span></small></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="technique" data-value="fit"><span>Elite Fit<small><span class="en">Weight loss and body shaping</span><span class="ar">نزول وزن ونحت</span></small></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="technique" data-value="tide"><span>Elite TIDE<small><span class="en">Peptide-based</span><span class="ar">قائمة على الببتيدات</span></small></span><i class="ph-light ph-check"></i></button>
+          <button class="c1-opt" data-pick="technique" data-value="advise"><span><span class="en">I would like Dr. Hoda to advise</span><span class="ar">أفضّل إن د. هدى تحدد</span></span><i class="ph-light ph-check"></i></button>
+        </div>
+      </div>
+
+      <div data-step="3" data-require="date,time">
+        <h3><span class="en">Choose a day and time.</span><span class="ar">اختر اليوم والميعاد.</span></h3>
+        <div class="c1-days" data-days data-day-class="c1-day"></div>
+        <div class="c1-times" data-times data-time-class="c1-time"></div>
+        <p class="c1-cc__note"><span class="en">Days follow each clinic's schedule. The clinic confirms your time by phone.</span><span class="ar">الأيام حسب مواعيد كل عيادة، والعيادة بتأكد معاك الميعاد بالتليفون.</span></p>
+      </div>
+
+      <div data-step="4" data-require="age,conds,consent">
+        <h3><span class="en">A little about your health.</span><span class="ar">شوية عن حالتك الصحية.</span></h3>
+        <div class="c1-field"><label for="c1-age"><span class="en">Age</span><span class="ar">السن</span></label><input id="c1-age" inputmode="numeric" maxlength="2" data-c1-age dir="ltr"></div>
+        <p class="c1-sub"><span class="en">Do you have any of these? Choose all that apply.</span><span class="ar">عندك أي حاجة من دول؟ اختار كل اللي ينطبق.</span></p>
+        <div class="c1-chips" data-c1-conds>
+          <button type="button" class="c1-chip" data-cond="heart" aria-pressed="false"><span class="en">Heart disease</span><span class="ar">أمراض القلب</span></button>
+          <button type="button" class="c1-chip" data-cond="bp" aria-pressed="false"><span class="en">Blood pressure</span><span class="ar">الضغط</span></button>
+          <button type="button" class="c1-chip" data-cond="diabetes" aria-pressed="false"><span class="en">Diabetes</span><span class="ar">السكر</span></button>
+          <button type="button" class="c1-chip" data-cond="thyroid" aria-pressed="false"><span class="en">Thyroid</span><span class="ar">الغدة</span></button>
+          <button type="button" class="c1-chip" data-cond="preg" aria-pressed="false"><span class="en">Pregnant or breastfeeding</span><span class="ar">حمل أو رضاعة</span></button>
+          <button type="button" class="c1-chip" data-cond="other" aria-pressed="false"><span class="en">Something else</span><span class="ar">حاجة تانية</span></button>
+          <button type="button" class="c1-chip" data-cond="none" aria-pressed="false"><span class="en">None</span><span class="ar">مفيش</span></button>
+        </div>
+        <div class="c1-hint" data-c1-less hidden><span><span class="en">With a chronic condition, Elite Less may suit you better. Dr. Hoda will confirm.</span><span class="ar">مع وجود مرض مزمن، إيليت لِس ممكن تكون أنسب ليك. ود. هدى هتأكد ده.</span></span><button type="button" class="link" data-c1-to-less><span class="en">Switch to Elite Less</span><span class="ar">غيّر لإيليت لِس</span></button></div>
+        <div class="c1-hint" data-c1-preg hidden><span><span class="en">Please mention pregnancy or breastfeeding at the visit. Dr. Hoda will advise what is safe.</span><span class="ar">من فضلك اذكر الحمل أو الرضاعة في الكشف، ود. هدى هتحدد الآمن ليك.</span></span></div>
+        <label class="c1-check"><input type="checkbox" data-c1-consent><span><span class="en">I agree that my health information is seen only by Dr. Hoda's medical team.</span><span class="ar">موافق إن بياناتي الصحية يشوفها الفريق الطبي لـ د. هدى فقط.</span></span></label>
+      </div>
+
+      <form data-step="5" data-final novalidate>
+        <h3 data-hide-on-done><span class="en">How can we reach you?</span><span class="ar">نتواصل معك إزاي؟</span></h3>
+        <div data-hide-on-done>
+          <div class="c1-summary" data-summary></div>
+          <div class="c1-field"><label for="c1-name"><span class="en">Full name</span><span class="ar">الاسم بالكامل</span></label><input id="c1-name" name="name" autocomplete="name"><span class="field-error" data-err="name"></span></div>
+          <div class="c1-field"><label for="c1-phone"><span class="en">Mobile (WhatsApp)</span><span class="ar">رقم الموبايل (واتساب)</span></label><input id="c1-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="01x xxxx xxxx" dir="ltr"><span class="field-error" data-err="phone"></span></div>
+          <button class="btn" type="submit" data-submit><span class="en">Confirm request</span><span class="ar">تأكيد الطلب</span></button>
+        </div>
+        <div class="c1-success" data-success>
+          <h3><span class="en">Request received.</span><span class="ar">تم استلام طلبك.</span></h3>
+          <p><span class="en">Thank you. The clinic will call you to confirm your appointment.</span><span class="ar">شكرًا لك. هيتم التواصل معك من العيادة لتأكيد الموعد.</span></p>
+          <p class="c1-ref"><span class="en">Request reference</span><span class="ar">رقم الطلب</span><b data-ref></b></p>
+          <div class="c1-done__actions">
+            <a class="link" data-c1-ics download="dr-hoda-appointment.ics" href="#"><i class="ph-light ph-calendar-plus"></i><span class="en">Add to calendar</span><span class="ar">أضف للتقويم</span></a>
+            <a class="link" data-c1-wa-confirm href="#" target="_blank" rel="noopener"><svg class="wa-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg><span class="en">Confirm on WhatsApp</span><span class="ar">أكّد على واتساب</span></a>
+            <a class="link" data-c1-map href="#" target="_blank" rel="noopener"><i class="ph-light ph-map-pin"></i><span class="en">Directions</span><span class="ar">الاتجاهات</span></a>
+          </div>
+        </div>
+      </form>
+
+      <p class="c1-cc__err" data-step-error aria-live="polite"></p>
+      <div class="c1-cc__nav" data-hide-on-done>
+        <button class="link" data-back><i class="ph-light ph-arrow-left flip"></i><span class="en">Back</span><span class="ar">رجوع</span></button>
+        <button class="btn" data-next><span class="en">Continue</span><span class="ar">التالي</span><i class="ph-light ph-arrow-right flip"></i></button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* Contact numbers: replace with the clinic's real numbers (international format, no +). */
+const C1_WA = "20XXXXXXXXXX", C1_TEL = "+20XXXXXXXXXX";
+/* Clinic schedule (from the reference booking page): weekdays 0 = Sunday ... 6 = Saturday. */
+const C1_CLINICS = {
+  cairo:   { dow: [6], from: 12, to: 19, q: "CMS Mall, Cairo" },
+  tanta:   { dow: [0, 1, 3], from: 14, to: 21, q: "Tanta, Egypt" },
+  zagazig: { dow: [2], from: 14, to: 21, q: "Zagazig, Egypt" }
+};
+
+App.register("c1", {
+  // quiz content (logic follows the reference homepage)
+  QUIZ: [
+    { q: ["How old are you?", "سنك كام؟"], o: [["Under 40", "أقل من ٤٠"], ["40 to 55", "من ٤٠ لـ ٥٥"], ["Over 55", "أكبر من ٥٥"]] },
+    { q: ["Any chronic condition? Heart, blood pressure, diabetes or thyroid.", "عندك أي مرض مزمن؟ قلب، ضغط، سكر، أو غدة."], o: [["No", "لا"], ["Yes", "أيوه"]] },
+    { q: ["What is your goal?", "هدفك إيه؟"], o: [["Weight loss only", "خسارة وزن بس"], ["Weight loss and body shaping", "خسارة وزن ونحت الجسم"]] },
+    { q: ["What pace feels right?", "عايز النتيجة تمشي بأنهي سرعة؟"], o: [["Gradual and comfortable", "تدريجي ومريح"], ["Faster and more visible", "أسرع وأوضح"]] },
+    { q: ["Have you tried weight-loss injections or treatments before?", "جرّبت حقن أو علاجات تخسيس قبل كده؟"], o: [["This is my first time", "أول مرة"], ["Yes, I have", "أيوه جرّبت"]] }
+  ],
+  REC: {
+    shot: [["The signature technique: weight loss through appetite control.", "التقنية الأساسية: خسارة وزن عن طريق التحكم في الشهية."], ["Elite Shot is the natural starting point for most people.", "إيليت شوت هي نقطة البداية الطبيعية لأغلب الحالات."]],
+    plus: [["Elite Shot, taken further, for a stronger approach.", "خطوة أبعد من إيليت شوت، لنهج أقوى."], ["You want a faster, more visible pace, so the advanced level may suit you.", "عايز نتيجة أسرع وأوضح، فالمستوى المتقدم ممكن يناسبك."]],
+    less: [["Careful weight loss with close medical follow-up.", "خسارة وزن بحذر مع متابعة طبية قريبة."], ["Because of age or a chronic condition, a more carefully calibrated technique fits best as a start.", "بسبب السن أو وجود مرض مزمن، الأنسب مبدئيًا تقنية مضبوطة بحذر أكبر."]],
+    fit:  [["Weight loss and body contouring together, without surgery.", "خسارة وزن ونحت للجسم مع بعض، من غير جراحة."], ["Your goal is losing and shaping together, which is exactly what Elite Fit does.", "هدفك خسارة ونحت مع بعض، وده بالظبط فكرة إيليت فيت."]],
+    tide: [["The injectable principle, with an added peptide-based layer.", "مبدأ الحقن، مع طبقة إضافية من الببتيدات."], ["You have tried treatments before and want a faster result, so Elite TIDE may suit you.", "جرّبت علاجات قبل كده وعايز نتيجة أسرع، فإيليت تايد ممكن تناسبك."]]
+  },
+  quiz: { step: 0, a: [] },
+
+  renderQuiz(root) {
+    const panel = root.querySelector("[data-quiz]"), q = this.quiz, Q = this.QUIZ, L = App.lang === "ar" ? 1 : 0;
+    const num = n => App.lang === "ar" ? String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]) : n;
+    root.querySelectorAll("[data-quiz-bars] span").forEach((b, i) => b.classList.toggle("on", i < q.step || q.step >= Q.length));
+    if (q.step < Q.length) {
+      const cur = Q[q.step];
+      panel.innerHTML = `<p class="c1-quiz__count">${App.t(`Question ${num(q.step + 1)} of 5`, `سؤال ${num(q.step + 1)} من ٥`)}</p>
+        <h3 class="c1-quiz__q">${cur.q[L]}</h3>
+        <div class="c1-quiz__opts">${cur.o.map((o, i) => `<button type="button" class="c1-qopt" data-qa="${i}"><span>${o[L]}</span><i class="ph-light ph-arrow-right"></i></button>`).join("")}</div>
+        ${q.step > 0 ? `<button type="button" class="c1-quiz__back" data-qback><i class="ph-light ph-arrow-left flip"></i>${App.t("Previous question", "السؤال السابق")}</button>` : ""}`;
+    } else {
+      const a = q.a;
+      let k = "shot";
+      if (a[0] === 2 || a[1] === 1) k = "less";
+      else if (a[2] === 1) k = "fit";
+      else if (a[3] === 1 && a[4] === 1) k = "tide";
+      else if (a[3] === 1) k = "plus";
+      const r = this.REC[k], name = App.label(App.TECH, k);
+      panel.innerHTML = `<p class="c1-quiz__count">${App.t("Your first suggestion", "الاقتراح المبدئي ليك")}</p>
+        <p class="c1-quiz__rec">${name}</p>
+        <p class="c1-quiz__promise">${r[0][L]}</p>
+        <p class="c1-quiz__why">${r[1][L]}</p>
+        <div class="c1-quiz__actions">
+          <button type="button" class="btn" data-book data-tech="${k}">${App.t(`Book for ${name}`, `احجز لـ ${name}`)}<i class="ph-light ph-arrow-right flip"></i></button>
+          <button type="button" class="link" data-qreset>${App.t("Take it again", "أعد الاختبار")}</button>
+        </div>
+        <p class="c1-quiz__note">${App.t("A first suggestion, not a diagnosis. Dr. Hoda confirms the right technique in your consultation.", "اقتراح مبدئي وليس تشخيص. د. هدى بتأكد التقنية المناسبة في الكشف.")}</p>`;
+    }
+    if (!App.RM) gsap.from(panel.children, { opacity: 0, y: 14, stagger: .05, duration: .5, ease: "power3.out" });
+  },
+
+  onLang(root) { this.renderQuiz(root); },
+
+  setup(root) {
+    const self = this;
+    const cc = root.querySelector("[data-c1-cc]");
+    const pad = n => String(n).padStart(2, "0");
+    const bk = App.booking(root.querySelector('[data-booking="c1"]'), {
+      steps: 5,
+      // real clinic schedule: only that clinic's weekdays, within the next 60 days
+      days(st) {
+        const c = C1_CLINICS[st.clinic]; if (!c) return [];
+        const out = [], d = new Date(); d.setHours(0, 0, 0, 0);
+        for (let i = 1; i <= 60 && out.length < 10; i++) { d.setDate(d.getDate() + 1); if (c.dow.includes(d.getDay())) out.push(new Date(d)); }
+        return out;
+      },
+      slots(st) { const c = C1_CLINICS[st.clinic]; if (!c) return []; const out = []; for (let h = c.from; h <= c.to; h++) out.push(`${pad(h)}:00`); return out; },
+      messages: {
+        age: ["Please enter your age (16 to 90).", "من فضلك اكتب سنك (من ١٦ لـ ٩٠)."],
+        conds: ["Please choose any conditions you have, or None.", "من فضلك اختار الحالات اللي عندك، أو مفيش."],
+        consent: ["Please agree so the medical team can review your case.", "من فضلك وافق علشان الفريق الطبي يقدر يراجع حالتك."]
+      },
+      makeRef: st => "HH-" + (st.clinic || "x").slice(0, 2).toUpperCase() + "-" + Math.floor(1000 + Math.random() * 9000),
+      onChange(k) { if (k === "technique") updateHints(); },
+      onDone(st) {
+        const c = C1_CLINICS[st.clinic], start = new Date(`${st.date}T${st.time}`), end = new Date(start.getTime() + 36e5);
+        const z = d => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+        const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT", "UID:" + st.ref, "DTSTART:" + z(start), "DTEND:" + z(end),
+          "SUMMARY:Dr. Hoda Hatem, " + App.CLINICS[st.clinic].en, "LOCATION:" + c.q, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+        root.querySelector("[data-c1-ics]").href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+        const when = App.fmtDay(start, { weekday: "long", day: "numeric", month: "long" }) + ", " + App.fmtTime(st.time);
+        const msg = App.t(`Hello, I requested an appointment at the ${App.label(App.CLINICS, st.clinic)} clinic, ${when}. Reference ${st.ref}.`,
+                          `أهلًا، طلبت ميعاد في عيادة ${App.label(App.CLINICS, st.clinic)}، ${when}. رقم الطلب ${st.ref}.`);
+        root.querySelector("[data-c1-wa-confirm]").href = `https://wa.me/${C1_WA}?text=${encodeURIComponent(msg)}`;
+        root.querySelector("[data-c1-map]").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(c.q);
+      },
+      onStep(n, el, dir) {
+        root.querySelector("[data-progress]").style.transform = `scaleX(${n / 5})`;
+        root.querySelector("[data-next]").style.display = n === 5 ? "none" : "";
+        root.querySelector("[data-back]").style.visibility = n === 1 ? "hidden" : "visible";
+        if (!App.RM) gsap.fromTo(el, { opacity: 0, y: 24 * dir }, { opacity: 1, y: 0, duration: .7, ease: "expo.out" });
+      }
+    });
+    // health step (age, conditions, consent)
+    const ageIn = root.querySelector("[data-c1-age]"), consent = root.querySelector("[data-c1-consent]");
+    const chips = [...root.querySelectorAll("[data-cond]")];
+    function updateHints() {
+      const conds = bk.state.conds || [];
+      const chronic = ["heart", "bp", "diabetes", "thyroid"].some(c => conds.includes(c));
+      root.querySelector("[data-c1-less]").hidden = !(chronic && bk.state.technique !== "less");
+      root.querySelector("[data-c1-preg]").hidden = !conds.includes("preg");
+    }
+    ageIn.addEventListener("input", () => {
+      ageIn.value = ageIn.value.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g, "").slice(0, 2);
+      const v = +ageIn.value; bk.set("age", v >= 16 && v <= 90 ? v : undefined);
+    });
+    chips.forEach(ch => ch.addEventListener("click", () => {
+      let conds = bk.state.conds || [];
+      const k = ch.dataset.cond, on = conds.includes(k);
+      conds = k === "none" ? (on ? [] : ["none"]) : on ? conds.filter(c => c !== k) : [...conds.filter(c => c !== "none"), k];
+      chips.forEach(c => c.setAttribute("aria-pressed", conds.includes(c.dataset.cond)));
+      bk.set("conds", conds.length ? conds : undefined); updateHints();
+    }));
+    root.querySelector("[data-c1-to-less]").addEventListener("click", () => { bk.set("technique", "less"); updateHints(); });
+    consent.addEventListener("change", () => bk.set("consent", consent.checked || undefined));
+    const resetHealth = () => { ageIn.value = ""; consent.checked = false; chips.forEach(c => c.setAttribute("aria-pressed", "false")); updateHints(); };
+
+    // contact links
+    root.querySelectorAll("[data-wa]").forEach(a => a.href = `https://wa.me/${C1_WA}`);
+    root.querySelectorAll("[data-tel]").forEach(a => a.href = `tel:${C1_TEL}`);
+
+    const open = (clinic, tech) => {
+      bk.reset(); resetHealth();
+      if (clinic) bk.set("clinic", clinic);
+      if (tech) bk.set("technique", tech);
+      bk.go(clinic ? (tech ? 3 : 2) : 1);
+      cc.classList.add("is-open"); document.body.style.overflow = "hidden";
+      if (!App.RM) {
+        gsap.fromTo(cc, { clipPath: "inset(100% 0 0 0)" }, { clipPath: "inset(0% 0 0 0)", duration: .9, ease: "expo.inOut" });
+        gsap.fromTo(cc.querySelector(".c1-cc__aside img"), { scale: 1.15 }, { scale: 1, duration: 1.6, ease: "expo.out" });
+      }
+    };
+    const close = () => {
+      const done = () => { cc.classList.remove("is-open"); document.body.style.overflow = ""; };
+      App.RM ? done() : gsap.to(cc, { clipPath: "inset(0 0 100% 0)", duration: .7, ease: "expo.inOut", onComplete: done });
+    };
+    // delegated, so buttons rendered later (the quiz result) also open the booking
+    root.addEventListener("click", e => { const b = e.target.closest("[data-book]"); if (b && root.contains(b)) open(b.dataset.clinic, b.dataset.tech); });
+    root.querySelector("[data-c1-close]").addEventListener("click", close);
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && cc.classList.contains("is-open")) close(); });
+
+    // mobile menu
+    const mm = root.querySelector("[data-c1-mm]");
+    root.querySelector("[data-c1-menu]").addEventListener("click", () => mm.classList.add("is-open"));
+    root.querySelectorAll("[data-c1-menu-close]").forEach(b => b.addEventListener("click", () => mm.classList.remove("is-open")));
+
+    // technique index accordion
+    root.querySelectorAll(".c1-row").forEach(row => {
+      const head = row.querySelector(".c1-row__head"), body = row.querySelector(".c1-row__body");
+      head.addEventListener("click", () => {
+        const open = !row.classList.contains("is-open");
+        row.classList.toggle("is-open", open); head.setAttribute("aria-expanded", open);
+        gsap.to(body, { height: open ? "auto" : 0, duration: App.RM ? 0 : .7, ease: "expo.inOut" });
+      });
+    });
+    App.wordify(root.querySelectorAll("[data-words] > span"));
+
+    // journal filter
+    const grid = root.querySelector(".c1-journal__grid");
+    root.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => {
+      const f = b.dataset.filter;
+      root.querySelectorAll("[data-filter]").forEach(x => x.setAttribute("aria-pressed", x === b));
+      const items = [...root.querySelectorAll(".c1-feature, .c1-post")];
+      items.forEach(el => el.hidden = !(f === "all" || el.dataset.cat === f));
+      grid.classList.toggle("no-feature", root.querySelector(".c1-feature").hidden);
+      root.querySelector("[data-journal-empty]").classList.toggle("show", !root.querySelector(".c1-post:not([hidden])"));
+      if (!App.RM) gsap.from(items.filter(el => !el.hidden), { opacity: 0, y: 16, stagger: .06, duration: .6, ease: "power3.out" });
+    }));
+
+    // quiz
+    const panel = root.querySelector("[data-quiz]");
+    panel.addEventListener("click", e => {
+      const opt = e.target.closest("[data-qa]");
+      if (opt) { self.quiz.a = [...self.quiz.a.slice(0, self.quiz.step), +opt.dataset.qa]; self.quiz.step++; return self.renderQuiz(root); }
+      if (e.target.closest("[data-qback]")) { self.quiz.step = Math.max(0, self.quiz.step - 1); return self.renderQuiz(root); }
+      if (e.target.closest("[data-qreset]")) { self.quiz = { step: 0, a: [] }; return self.renderQuiz(root); }
+    });
+    this.renderQuiz(root);
+
+    // before / after slider
+    const ba = root.querySelector("[data-ba]"), range = ba.querySelector("input");
+    range.addEventListener("input", () => ba.style.setProperty("--pos", range.value + "%"));
+
+    // newsletter
+    const news = root.querySelector("[data-c1-news]");
+    news.addEventListener("submit", e => {
+      e.preventDefault();
+      const input = news.elements.email, msg = news.querySelector(".c1-news__msg"), btn = news.querySelector("button");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value.trim())) { msg.className = "c1-news__msg err"; msg.textContent = App.t("Please enter a valid email.", "من فضلك اكتب إيميل صحيح."); return; }
+      btn.classList.add("is-loading");
+      setTimeout(() => { btn.classList.remove("is-loading"); input.value = ""; msg.className = "c1-news__msg"; msg.textContent = App.t("Thank you. You're on the list.", "شكرًا لك، تم الاشتراك."); }, 900);
+    });
+  },
+
+  animate(root) {
+    const nav = root.querySelector(".c1-nav");
+    const steps = gsap.utils.toArray(root.querySelectorAll(".c1-pstep")), figs = root.querySelectorAll(".c1-process__fig img");
+    const setStep = i => { steps.forEach((s, k) => s.classList.toggle("is-on", k === i)); figs.forEach((f, k) => f.classList.toggle("is-on", k === i)); };
+    setStep(0);
+    steps.forEach((s, i) => ScrollTrigger.create({ trigger: s, start: "top 55%", end: "bottom 55%", onToggle: self => self.isActive && setStep(i) }));
+    gsap.to(".c1-process__bar span", { scaleX: 1, ease: "none", scrollTrigger: { trigger: ".c1-process__steps", start: "top 55%", end: "bottom 55%", scrub: true } });
+    ScrollTrigger.create({ start: 80, end: "max", onEnter: () => nav.classList.add("is-solid"), onLeaveBack: () => nav.classList.remove("is-solid") });
+    nav.classList.toggle("is-solid", window.scrollY > 80);
+    const wa = root.querySelector("[data-c1-wa]");
+    ScrollTrigger.create({ start: () => window.innerHeight * .8, end: "max", onEnter: () => wa.classList.add("is-on"), onLeaveBack: () => wa.classList.remove("is-on") });
+    wa.classList.toggle("is-on", window.scrollY > window.innerHeight * .8);
+    if (App.RM) return;
+
+    // hero: the portrait quietly fades in and settles, headline rises line by line
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    tl.from(".c1-hero__photo img", { opacity: 0, y: 30, scale: 1.04, transformOrigin: "50% 100%", duration: 1.6 })
+      .from(".c1-hero .ln > span", { yPercent: 110, duration: 1.1, stagger: .1, ease: "expo.out" }, .2)
+      .from(".c1-hero [data-fade], .c1-eyebrow", { opacity: 0, y: 16, duration: 1, stagger: .1 }, "-=.8")
+      .from(".c1-hero__mark", { opacity: 0, scale: .9, duration: 2 }, "-=1.4");
+    gsap.to(".c1-hero__mark", { yPercent: -18, ease: "none", scrollTrigger: { trigger: ".c1-hero", start: "top top", end: "bottom top", scrub: true } });
+
+    // philosophy: words take the brand color as you read
+    gsap.to(".c1-philo .w", { color: "#005A54", stagger: .05, ease: "none",
+      scrollTrigger: { trigger: ".c1-philo blockquote", start: "top 75%", end: "bottom 45%", scrub: true } });
+
+    // shot
+    gsap.from(".c1-shot .ln > span", { yPercent: 110, duration: 1.3, stagger: .15, ease: "expo.out", scrollTrigger: { trigger: ".c1-shot", start: "top 70%" } });
+    gsap.to(".c1-shot__figure img", { yPercent: -18, ease: "none", scrollTrigger: { trigger: ".c1-shot__figure", start: "top bottom", end: "bottom top", scrub: true } });
+    gsap.from(".c1-about__portrait img", { opacity: 0, y: 30, scale: 1.04, duration: 1.6, ease: "power3.out", scrollTrigger: { trigger: ".c1-about__portrait", start: "top 80%" } });
+    gsap.from(".c1-principles li", { opacity: 0, y: 20, stagger: .1, duration: .9, ease: "power3.out", scrollTrigger: { trigger: ".c1-principles", start: "top 85%" } });
+
+    // the difference: the old habits get crossed out as you read them
+    gsap.fromTo(".c1-diff__col--old .t", { "--strike": 0 }, { "--strike": 1, stagger: .15, duration: .8, ease: "power2.inOut", scrollTrigger: { trigger: ".c1-diff__grid", start: "top 70%" } });
+    gsap.from(".c1-diff__col--new li", { opacity: 0, x: App.rtl ? -20 : 20, stagger: .12, duration: .8, ease: "power3.out", scrollTrigger: { trigger: ".c1-diff__grid", start: "top 65%" } });
+
+    // journal entrance
+    gsap.from(".c1-feature, .c1-post", { opacity: 0, y: 30, stagger: .08, duration: 1, ease: "expo.out", scrollTrigger: { trigger: ".c1-journal__grid", start: "top 80%" } });
+
+    App.reveal(root, "[data-fade]:not(.c1-hero [data-fade])");
+    gsap.from(".c1-compare tbody tr", { opacity: 0, y: 16, stagger: .07, duration: .8, ease: "power3.out", scrollTrigger: { trigger: ".c1-compare table", start: "top 80%" } });
+    gsap.from(".c1-ba", { opacity: 0, y: 30, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: ".c1-ba", start: "top 82%" } });
+    gsap.from(".c1-sig > *", { opacity: 0, y: 24, stagger: .12, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: ".c1-sig", start: "top 80%" } });
+    App.revealStagger(root, "[data-stagger]");
+    gsap.from(".c1-row", { opacity: 0, y: 30, stagger: .08, duration: 1, ease: "expo.out", scrollTrigger: { trigger: ".c1-index__list", start: "top 80%" } });
+  }
+});
+</script>
+
+
+<script>
+/* Standalone boot for a single direction (no direction dock). */
+(() => {
+  const ID = document.body.dataset.only || "c1";
+  document.querySelectorAll("[data-set-lang]").forEach(b => b.addEventListener("click", () => App.setLang(b.dataset.setLang)));
+
+  // in-page anchors scroll smoothly
+  document.addEventListener("click", e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute("href").slice(1);
+    if (id === ID) { e.preventDefault(); window.scrollTo({ top: 0, behavior: App.RM ? "auto" : "smooth" }); return; }
+    const target = id && document.getElementById(id);
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: App.RM ? "auto" : "smooth", block: "start" }); }
+  });
+
+  let lang = "en";
+  try { lang = localStorage.getItem("hh-lang") || "en"; } catch (e) {}
+  App.lang = lang;
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-set-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.setLang === lang));
+  App.show(ID);
+  window.addEventListener("load", () => ScrollTrigger.refresh());
+})();
+</script>
+</body>
+</html>
