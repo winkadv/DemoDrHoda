@@ -82,8 +82,8 @@ html[lang="ar"] * { letter-spacing: 0 !important; font-style: normal !important;
 
 /* photo treatment helpers: neutral clean rendering */
 .melt { mix-blend-mode: normal; filter: none; }
-/* face crop from the studio portrait (face sits ~27% from the top) */
-.face-crop img { object-fit: cover; object-position: 50% 0; transform: scale(var(--z, 3)); transform-origin: 50% 27%; }
+/* face crop from the studio portrait (shows full head, turban, and face) */
+.face-crop img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; transform: scale(var(--z, 1.85)); transform-origin: 50% 20%; }
 .duo { position: relative; background: var(--sand); overflow: hidden; }
 .duo img { mix-blend-mode: normal; filter: none; }
 .duo::after { display: none; }
@@ -431,13 +431,13 @@ html[lang="ar"] .c1-shot h2 { line-height: 1.15; font-size: clamp(60px, 10vw, 17
 .c1-shot h2 em { font-style: normal; font-weight: 600; display: block; }
 .c1-shot__lead { font-size: clamp(20px, 1.8vw, 26px); line-height: 1.5; font-weight: 300; margin-top: 40px; max-width: 30ch; }
 .c1-shot__figure { aspect-ratio: 3/4; overflow: hidden; position: relative; background: #ffffff; }
-.c1-shot__figure img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
+.c1-shot__figure img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; }
 .c1-shot__nots { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); margin-top: clamp(48px, 8vh, 96px); border-top: 1px solid var(--sand-20); }
 .c1-shot__nots li { padding: 28px 0 0; padding-inline-end: 24px; font-size: 15px; line-height: 1.6; opacity: .85; }
 .c1-shot__nots strong { display: block; font-weight: 500; font-size: 22px; margin-bottom: 6px; opacity: 1; }
 @media (max-width: 860px) {
   .c1-shot .wrap { grid-template-columns: 1fr; }
-  .c1-shot__figure { aspect-ratio: 4/3; }
+  .c1-shot__figure { aspect-ratio: 4/5; max-height: 480px; width: 100%; }
   .c1-shot__nots { grid-template-columns: 1fr; }
 }
 
@@ -1149,7 +1149,7 @@ html[lang="ar"] .c1-cc h3 { line-height: 1.5; }
   <section class="c1-close">
     <div class="wrap">
       <figure class="c1-sig" data-sig>
-        <div class="c1-sig__face face-crop" style="--z:3"><img class="melt" src="pics/website1.png" alt="Dr. Hoda Hatem"></div>
+        <div class="c1-sig__face face-crop" style="--z:1.85"><img src="pics/website1.png" alt="Dr. Hoda Hatem"></div>
         <blockquote class="c1-sig__quote"><span class="en">“Come as you are. We start with a conversation, not a diet.”</span><span class="ar">«تعالى زي ما انت. هنبدأ بحوار، مش برجيم.»</span></blockquote>
         <figcaption class="c1-sig__name"><b><span class="en">Dr. Hoda Hatem</span><span class="ar">د. هدى حاتم</span></b><span><span class="en">Founder of the Elite techniques</span><span class="ar">مؤسسة تقنيات إيليت</span></span></figcaption>
         <div class="c1-sig__cta">
@@ -1492,7 +1492,7 @@ App.register("c1", {
 
     // shot
     gsap.from(".c1-shot .ln > span", { yPercent: 110, duration: 1.3, stagger: .15, ease: "expo.out", scrollTrigger: { trigger: ".c1-shot", start: "top 70%" } });
-    gsap.to(".c1-shot__figure img", { yPercent: -18, ease: "none", scrollTrigger: { trigger: ".c1-shot__figure", start: "top bottom", end: "bottom top", scrub: true } });
+    gsap.to(".c1-shot__figure img", { yPercent: -6, ease: "none", scrollTrigger: { trigger: ".c1-shot__figure", start: "top bottom", end: "bottom top", scrub: true } });
     gsap.from(".c1-about__portrait img", { opacity: 0, y: 30, scale: 1.04, duration: 1.6, ease: "power3.out", scrollTrigger: { trigger: ".c1-about__portrait", start: "top 80%" } });
     gsap.from(".c1-principles li", { opacity: 0, y: 20, stagger: .1, duration: .9, ease: "power3.out", scrollTrigger: { trigger: ".c1-principles", start: "top 85%" } });
 
