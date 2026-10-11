@@ -80,14 +80,13 @@ html[lang="ar"] * { letter-spacing: 0 !important; font-style: normal !important;
 .concept section[id] { scroll-margin-top: 84px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* photo treatment helper: the studio photo melts into sand backgrounds */
-.melt { mix-blend-mode: multiply; filter: brightness(1.16) contrast(1.04); }
+/* photo treatment helpers: neutral clean rendering */
+.melt { mix-blend-mode: normal; filter: none; }
 /* face crop from the studio portrait (face sits ~27% from the top) */
 .face-crop img { object-fit: cover; object-position: 50% 0; transform: scale(var(--z, 3)); transform-origin: 50% 27%; }
-/* duotone: teal shadows, sand highlights (works on any background) */
-.duo { position: relative; background: var(--sand); isolation: isolate; overflow: hidden; }
-.duo img { filter: grayscale(1) brightness(1.15) contrast(1.08); mix-blend-mode: multiply; }
-.duo::after { content: ""; position: absolute; inset: 0; background: var(--teal); mix-blend-mode: lighten; pointer-events: none; }
+.duo { position: relative; background: var(--sand); overflow: hidden; }
+.duo img { mix-blend-mode: normal; filter: none; }
+.duo::after { display: none; }
 
 /* ---------- Shared booking states (each direction styles the rest) ---------- */
 
@@ -404,11 +403,9 @@ html[lang="ar"] .c1-hero h1 { line-height: 1.3; font-size: clamp(42px, 5.6vw, 86
 .c1-hero__cta { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; }
 .c1-hero__media { position: relative; height: 100%; min-height: 560px; display: flex; align-items: stretch; align-self: stretch; }
 .c1-hero__mark { position: absolute; width: 74%; top: 8%; inset-inline-end: 6%; opacity: .07; }
-/* full-height portrait: runs from the very top (behind the menu) to the bottom of the screen */
-.c1-hero__photo { position: relative; width: 100%; height: 100dvh; min-height: 560px; background: var(--sand); -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%); mask-image: linear-gradient(90deg, transparent, #000 12%); overflow: hidden; padding-top: 12px; display: flex; justify-content: center; align-items: flex-end; }
-html[dir="rtl"] .c1-hero__photo { -webkit-mask-image: linear-gradient(270deg, transparent, #000 12%); mask-image: linear-gradient(270deg, transparent, #000 12%); }
-.c1-hero__photo img { height: 100%; width: auto; max-width: 100%; object-fit: contain; object-position: 50% 100%;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+/* full-height portrait */
+.c1-hero__photo { position: relative; width: 100%; height: 100dvh; min-height: 560px; background: var(--sand); overflow: hidden; padding-top: 12px; display: flex; justify-content: center; align-items: flex-end; }
+.c1-hero__photo img { height: 88%; width: auto; max-width: 100%; object-fit: contain; object-position: 50% 100%; transform: translateY(18px); }
 @media (max-width: 960px) {
   .c1-hero { grid-template-columns: 1fr; align-items: start; }
   .c1-hero__text { padding: 124px var(--pad) 24px; }
@@ -433,8 +430,8 @@ html[lang="ar"] .c1-philo blockquote { line-height: 1.7; }
 html[lang="ar"] .c1-shot h2 { line-height: 1.15; font-size: clamp(60px, 10vw, 170px); }
 .c1-shot h2 em { font-style: normal; font-weight: 600; display: block; }
 .c1-shot__lead { font-size: clamp(20px, 1.8vw, 26px); line-height: 1.5; font-weight: 300; margin-top: 40px; max-width: 30ch; }
-.c1-shot__figure { aspect-ratio: 3/4; overflow: hidden; position: relative; background: var(--teal-deep); }
-.c1-shot__figure img { width: 100%; height: 125%; object-fit: cover; object-position: 50% 12%; }
+.c1-shot__figure { aspect-ratio: 3/4; overflow: hidden; position: relative; background: #ffffff; }
+.c1-shot__figure img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 .c1-shot__nots { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); margin-top: clamp(48px, 8vh, 96px); border-top: 1px solid var(--sand-20); }
 .c1-shot__nots li { padding: 28px 0 0; padding-inline-end: 24px; font-size: 15px; line-height: 1.6; opacity: .85; }
 .c1-shot__nots strong { display: block; font-weight: 500; font-size: 22px; margin-bottom: 6px; opacity: 1; }
